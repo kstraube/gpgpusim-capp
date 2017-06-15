@@ -35,6 +35,7 @@
 #include "shader.h"
 #include <iostream>
 #include <fstream>
+#include <ostream>
 #include <list>
 #include <stdio.h>
 
@@ -164,30 +165,30 @@ struct memory_config {
                 &nbk,&tCCD,&tRRD,&tRCD,&tRAS,&tRP,&tRC,&CL,&WL,&tCDLR,&tWR,&nbkgrp,&tCCDL,&tRTPL);
       } else {
          // named dram timing options (unordered)
-         option_parser_t dram_opp = option_parser_create(); 
+         option_parser_t dram_opp = option_parser_create();
 
-         option_parser_register(dram_opp, "nbk",  OPT_UINT32, &nbk,   "number of banks", ""); 
-         option_parser_register(dram_opp, "CCD",  OPT_UINT32, &tCCD,  "column to column delay", ""); 
-         option_parser_register(dram_opp, "RRD",  OPT_UINT32, &tRRD,  "minimal delay between activation of rows in different banks", ""); 
-         option_parser_register(dram_opp, "RCD",  OPT_UINT32, &tRCD,  "row to column delay", ""); 
-         option_parser_register(dram_opp, "RAS",  OPT_UINT32, &tRAS,  "time needed to activate row", ""); 
-         option_parser_register(dram_opp, "RP",   OPT_UINT32, &tRP,   "time needed to precharge (deactivate) row", ""); 
-         option_parser_register(dram_opp, "RC",   OPT_UINT32, &tRC,   "row cycle time", ""); 
-         option_parser_register(dram_opp, "CDLR", OPT_UINT32, &tCDLR, "switching from write to read (changes tWTR)", ""); 
-         option_parser_register(dram_opp, "WR",   OPT_UINT32, &tWR,   "last data-in to row precharge", ""); 
+         option_parser_register(dram_opp, "nbk",  OPT_UINT32, &nbk,   "number of banks", "");
+         option_parser_register(dram_opp, "CCD",  OPT_UINT32, &tCCD,  "column to column delay", "");
+         option_parser_register(dram_opp, "RRD",  OPT_UINT32, &tRRD,  "minimal delay between activation of rows in different banks", "");
+         option_parser_register(dram_opp, "RCD",  OPT_UINT32, &tRCD,  "row to column delay", "");
+         option_parser_register(dram_opp, "RAS",  OPT_UINT32, &tRAS,  "time needed to activate row", "");
+         option_parser_register(dram_opp, "RP",   OPT_UINT32, &tRP,   "time needed to precharge (deactivate) row", "");
+         option_parser_register(dram_opp, "RC",   OPT_UINT32, &tRC,   "row cycle time", "");
+         option_parser_register(dram_opp, "CDLR", OPT_UINT32, &tCDLR, "switching from write to read (changes tWTR)", "");
+         option_parser_register(dram_opp, "WR",   OPT_UINT32, &tWR,   "last data-in to row precharge", "");
 
-         option_parser_register(dram_opp, "CL", OPT_UINT32, &CL, "CAS latency", ""); 
-         option_parser_register(dram_opp, "WL", OPT_UINT32, &WL, "Write latency", ""); 
+         option_parser_register(dram_opp, "CL", OPT_UINT32, &CL, "CAS latency", "");
+         option_parser_register(dram_opp, "WL", OPT_UINT32, &WL, "Write latency", "");
 
          //Disabling bank groups if their values are not specified
-         option_parser_register(dram_opp, "nbkgrp", OPT_UINT32, &nbkgrp, "number of bank groups", "1"); 
-         option_parser_register(dram_opp, "CCDL",   OPT_UINT32, &tCCDL,  "column to column delay between accesses to different bank groups", "0"); 
-         option_parser_register(dram_opp, "RTPL",   OPT_UINT32, &tRTPL,  "read to precharge delay between accesses to different bank groups", "0"); 
+         option_parser_register(dram_opp, "nbkgrp", OPT_UINT32, &nbkgrp, "number of bank groups", "1");
+         option_parser_register(dram_opp, "CCDL",   OPT_UINT32, &tCCDL,  "column to column delay between accesses to different bank groups", "0");
+         option_parser_register(dram_opp, "RTPL",   OPT_UINT32, &tRTPL,  "read to precharge delay between accesses to different bank groups", "0");
 
-         option_parser_delimited_string(dram_opp, gpgpu_dram_timing_opt, "=:;"); 
-         fprintf(stdout, "DRAM Timing Options:\n"); 
-         option_parser_print(dram_opp, stdout); 
-         option_parser_destroy(dram_opp); 
+         option_parser_delimited_string(dram_opp, gpgpu_dram_timing_opt, "=:;");
+         fprintf(stdout, "DRAM Timing Options:\n");
+         option_parser_print(dram_opp, stdout);
+         option_parser_destroy(dram_opp);
       }
 
       int nbkt = nbk/nbkgrp;
@@ -199,15 +200,15 @@ struct memory_config {
       assert(nbkgrp>0 && "Number of bank groups cannot be zero");
       tRCDWR = tRCD-(WL+1);
       tRTW = (CL+(BL/data_command_freq_ratio)+2-WL);
-      tWTR = (WL+(BL/data_command_freq_ratio)+tCDLR); 
+      tWTR = (WL+(BL/data_command_freq_ratio)+tCDLR);
       tWTP = (WL+(BL/data_command_freq_ratio)+tWR);
-      dram_atom_size = BL * busW * gpu_n_mem_per_ctrlr; // burst length x bus width x # chips per partition 
+      dram_atom_size = BL * busW * gpu_n_mem_per_ctrlr; // burst length x bus width x # chips per partition
 
-      assert( m_n_sub_partition_per_memory_channel > 0 ); 
-      assert( (nbk % m_n_sub_partition_per_memory_channel == 0) 
-              && "Number of DRAM banks must be a perfect multiple of memory sub partition"); 
-      m_n_mem_sub_partition = m_n_mem * m_n_sub_partition_per_memory_channel; 
-      fprintf(stdout, "Total number of memory sub partition = %u\n", m_n_mem_sub_partition); 
+      assert( m_n_sub_partition_per_memory_channel > 0 );
+      assert( (nbk % m_n_sub_partition_per_memory_channel == 0)
+              && "Number of DRAM banks must be a perfect multiple of memory sub partition");
+      m_n_mem_sub_partition = m_n_mem * m_n_sub_partition_per_memory_channel;
+      fprintf(stdout, "Total number of memory sub partition = %u\n", m_n_mem_sub_partition);
 
       m_address_mapping.init(m_n_mem, m_n_sub_partition_per_memory_channel);
       m_L2_config.init(&m_address_mapping);
@@ -249,13 +250,13 @@ struct memory_config {
    unsigned tRP;    //row precharge ie. deactivate row
    unsigned tRC;    //row cycle time ie. precharge current, then activate different row
    unsigned tCDLR;  //Last data-in to Read command (switching from write to read)
-   unsigned tWR;    //Last data-in to Row precharge 
+   unsigned tWR;    //Last data-in to Row precharge
 
    unsigned CL;     //CAS latency
    unsigned WL;     //WRITE latency
    unsigned BL;     //Burst Length in bytes (4 in GDDR3, 8 in GDDR5)
    unsigned tRTW;   //time to switch from read to write
-   unsigned tWTR;   //time to switch from write to read 
+   unsigned tWTR;   //time to switch from write to read
    unsigned tWTP;   //time to switch from write to precharge in the same bank
    unsigned busW;
 
@@ -265,7 +266,7 @@ struct memory_config {
    unsigned nbk;
 
    unsigned data_command_freq_ratio; // frequency ratio between DRAM data bus and command bus (2 for GDDR3, 4 for GDDR5)
-   unsigned dram_atom_size; // number of bytes transferred per read or write command 
+   unsigned dram_atom_size; // number of bytes transferred per read or write command
 
    linear_to_raw_address_translation m_address_mapping;
 
@@ -281,7 +282,7 @@ class gpgpu_sim_config : public power_config, public gpgpu_functional_sim_config
 public:
     gpgpu_sim_config() { m_valid = false; }
     void reg_options(class OptionParser * opp);
-    void init() 
+    void init()
     {
         gpu_stat_sample_freq = 10000;
         gpu_runtime_stat_flag = 0;
@@ -289,12 +290,12 @@ public:
         m_shader_config.init();
         ptx_set_tex_cache_linesize(m_shader_config.m_L1T_config.get_line_sz());
         m_memory_config.init();
-        init_clock_domains(); 
+        init_clock_domains();
         power_config::init();
         Trace::init();
 
 
-        // initialize file name if it is not set 
+        // initialize file name if it is not set
         time_t curr_time;
         time(&curr_time);
         char *date = ctime(&curr_time);
@@ -316,7 +317,7 @@ public:
     unsigned get_max_concurrent_kernel() const { return max_concurrent_kernel; }
 
 private:
-    void init_clock_domains(void ); 
+    void init_clock_domains(void );
 
 
     bool m_valid;
@@ -340,7 +341,7 @@ private:
     bool  gpgpu_flush_l1_cache;
     bool  gpgpu_flush_l2_cache;
     bool  gpu_deadlock_detect;
-    int   gpgpu_frfcfs_dram_sched_queue_size; 
+    int   gpgpu_frfcfs_dram_sched_queue_size;
     int   gpgpu_cflog_interval;
     char * gpgpu_clock_domains;
     unsigned max_concurrent_kernel;
@@ -357,7 +358,7 @@ private:
 
 
 
-    unsigned long long liveness_message_freq; 
+    unsigned long long liveness_message_freq;
 
     friend class gpgpu_sim;
 };
@@ -376,12 +377,16 @@ public:
 
    void init();
    void cycle();
-   bool active(); 
+<<<<<<< HEAD
+   bool active();
    bool cycle_insn_cta_max_hit() {
        return (m_config.gpu_max_cycle_opt && (gpu_tot_sim_cycle + gpu_sim_cycle) >= m_config.gpu_max_cycle_opt) ||
            (m_config.gpu_max_insn_opt && (gpu_tot_sim_insn + gpu_sim_insn) >= m_config.gpu_max_insn_opt) ||
            (m_config.gpu_max_cta_opt && (gpu_tot_issued_cta >= m_config.gpu_max_cta_opt) );
    }
+=======
+   bool active();
+>>>>>>> e8fa1cd... Added stats for imbalance.
    void print_stats();
    void update_stats();
    void deadlock_check();
@@ -393,7 +398,7 @@ public:
    int wrp_size() const;
    int shader_clock() const;
    const struct cudaDeviceProp *get_prop() const;
-   enum divergence_support_t simd_model() const; 
+   enum divergence_support_t simd_model() const;
 
    unsigned threads_per_core() const;
    bool get_more_cta_left() const;
@@ -406,21 +411,21 @@ public:
    void dump_pipeline( int mask, int s, int m ) const;
 
    //The next three functions added to be used by the functional simulation function
-   
+
    //! Get shader core configuration
    /*!
     * Returning the configuration of the shader core, used by the functional simulation only so far
     */
    const struct shader_core_config * getShaderCoreConfig();
-   
-   
+
+
    //! Get shader core Memory Configuration
     /*!
     * Returning the memory configuration of the shader core, used by the functional simulation only so far
     */
    const struct memory_config * getMemoryConfig();
-   
-   
+
+
    //! Get shader core SIMT cluster
    /*!
     * Returning the cluster of of the shader core, used by the functional simulation so far
@@ -460,7 +465,7 @@ private:
    unsigned m_last_cluster_issue;
    float * average_pipeline_duty_cycle;
    float * active_sms;
-   // time of next rising edge 
+   // time of next rising edge
    double core_time;
    double icnt_time;
    double dram_time;
@@ -471,7 +476,7 @@ private:
 
    //// configuration parameters ////
    const gpgpu_sim_config &m_config;
-  
+
    const struct cudaDeviceProp     *m_cuda_properties;
    const struct shader_core_config *m_shader_config;
    const struct memory_config      *m_memory_config;
@@ -483,11 +488,11 @@ private:
    class gpgpu_sim_wrapper *m_gpgpusim_wrapper;
    unsigned long long  last_gpu_sim_insn;
 
-   unsigned long long  last_liveness_message_time; 
+   unsigned long long  last_liveness_message_time;
 
    std::map<std::string, FuncCache> m_special_cache_config;
 
-   std::vector<std::string> m_executed_kernel_names; //< names of kernel for stat printout 
+   std::vector<std::string> m_executed_kernel_names; //< names of kernel for stat printout
    std::vector<unsigned> m_executed_kernel_uids; //< uids of kernel launches for stat printout
    std::string executed_kernel_info_string(); //< format the kernel information into a string for stat printout
    void clear_executed_kernel_info(); //< clear the kernel information after stat printout
@@ -524,6 +529,8 @@ public:
      m_functional_sim = false;
      m_functional_sim_kernel = NULL;
    }
+
+   std::fstream myoutput;
 };
 
 #endif
