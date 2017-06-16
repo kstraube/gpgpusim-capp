@@ -377,16 +377,13 @@ public:
 
    void init();
    void cycle();
-<<<<<<< HEAD
+
    bool active();
    bool cycle_insn_cta_max_hit() {
        return (m_config.gpu_max_cycle_opt && (gpu_tot_sim_cycle + gpu_sim_cycle) >= m_config.gpu_max_cycle_opt) ||
            (m_config.gpu_max_insn_opt && (gpu_tot_sim_insn + gpu_sim_insn) >= m_config.gpu_max_insn_opt) ||
            (m_config.gpu_max_cta_opt && (gpu_tot_issued_cta >= m_config.gpu_max_cta_opt) );
    }
-=======
-   bool active();
->>>>>>> e8fa1cd... Added stats for imbalance.
    void print_stats();
    void update_stats();
    void deadlock_check();
