@@ -1934,6 +1934,36 @@ public:
 
     void get_icnt_stats(long &n_simt_to_mem, long &n_mem_to_simt) const;
 
+    double get_core_time() const {
+        return m_core_time;
+    }
+
+    void set_clock_period(double period) {
+        m_clock_period = period;
+    }
+
+    bool need_to_tick(double smallest) {
+        assert(m_ticking == false);
+        if (m_core_time <= smallest) {
+            m_ticking = true;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    bool is_ticking() { return m_ticking; }
+
+    void no_tick() {
+        m_ticking = false;
+        m_core_time += m_clock_period;
+    }
+
+    void reinit_clock_domain() {
+        m_core_time = 0;
+        m_ticking = false;
+    }
+
 private:
     unsigned m_cluster_id;
     gpgpu_sim *m_gpu;
@@ -1945,6 +1975,10 @@ private:
     unsigned m_cta_issue_next_core;
     std::list<unsigned> m_core_sim_order;
     std::list<mem_fetch*> m_response_fifo;
+
+    double m_clock_period;
+    double m_core_time;
+    bool m_ticking;
 };
 
 class shader_memory_interface : public mem_fetch_interface {

@@ -316,6 +316,8 @@ public:
     unsigned num_cluster() const { return m_shader_config.n_simt_clusters; }
     unsigned get_max_concurrent_kernel() const { return max_concurrent_kernel; }
 
+    double get_core_period() const { return core_period; }
+
 private:
     void init_clock_domains(void );
 
@@ -467,6 +469,7 @@ private:
    double icnt_time;
    double dram_time;
    double l2_time;
+   double gpu_time;
 
    // debug
    bool gpu_deadlock;
