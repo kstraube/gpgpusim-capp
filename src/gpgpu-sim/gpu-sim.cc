@@ -94,6 +94,7 @@ unsigned int gpu_stall_icnt2sh = 0;
 #define  L2    0x02
 #define  DRAM  0x04
 #define  ICNT  0x08
+#define  GPU   0x10
 
 
 #define MEM_LATENCY_STAT_IMPL
@@ -704,6 +705,7 @@ void gpgpu_sim_config::init_clock_domains(void )
    l2_period = 1/l2_freq;
    printf("GPGPU-Sim uArch: clock freqs: %lf:%lf:%lf:%lf\n",core_freq,icnt_freq,l2_freq,dram_freq);
    printf("GPGPU-Sim uArch: clock periods: %.20lf:%.20lf:%.20lf:%.20lf\n",core_period,icnt_period,l2_period,dram_period);
+
 }
 
 void gpgpu_sim::reinit_clock_domains(void)
@@ -712,6 +714,10 @@ void gpgpu_sim::reinit_clock_domains(void)
    dram_time = 0;
    icnt_time = 0;
    l2_time = 0;
+   gpu_time = 0;
+   for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
+		m_cluster[i]->reinit_clock_domain();
+   }
 }
 
 bool gpgpu_sim::active()
@@ -773,6 +779,10 @@ void gpgpu_sim::init()
         init_mcpat(m_config, m_gpgpusim_wrapper, m_config.gpu_stat_sample_freq,  gpu_tot_sim_insn, gpu_sim_insn);
     }
 #endif
+
+	for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
+		m_cluster[i]->set_clock_period(m_config.core_period);
+	}
 }
 
 void gpgpu_sim::update_stats() {
@@ -1320,7 +1330,12 @@ void dram_t::dram_log( int task )
 //Find next clock domain and increment its time
 int gpgpu_sim::next_clock_domain(void)
 {
-   double smallest = min3(core_time,icnt_time,dram_time);
+   core_time = m_cluster[0]->get_core_time();
+   for (unsigned i=1;i<m_shader_config->n_simt_clusters;i++) {
+ 	   core_time = min(core_time, m_cluster[i]->get_core_time());
+   }
+   double smallest = min3(icnt_time,dram_time,gpu_time);
+   smallest = min(core_time, smallest);
    int mask = 0x00;
    if ( l2_time <= smallest ) {
       smallest = l2_time;
@@ -1335,9 +1350,14 @@ int gpgpu_sim::next_clock_domain(void)
       mask |= DRAM;
       dram_time += m_config.dram_period;
    }
-   if ( core_time <= smallest ) {
-      mask |= CORE;
-      core_time += m_config.core_period;
+   for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
+	   if (m_cluster[i]->need_to_tick(smallest)) {
+		   mask |= CORE;
+	   }
+   }
+   if ( gpu_time <= smallest ) {
+	   mask |= GPU;
+	   gpu_time += m_config.core_period;
    }
    return mask;
 }
@@ -1363,8 +1383,10 @@ void gpgpu_sim::cycle()
 
    if (clock_mask & CORE ) {
        // shader core loading (pop from ICNT into core) follows CORE clock
-      for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++)
-         m_cluster[i]->icnt_cycle();
+      for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
+		 if (m_cluster[i]->is_ticking())
+         	m_cluster[i]->icnt_cycle();
+	 }
    }
     if (clock_mask & ICNT) {
         // pop from memory controller to interconnect
@@ -1419,17 +1441,25 @@ void gpgpu_sim::cycle()
    }
 
    if (clock_mask & CORE) {
+	   for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
+ 		 if (m_cluster[i]->is_ticking()) {
+ 	         if (m_cluster[i]->get_not_completed() || get_more_cta_left() ) {
+ 	               m_cluster[i]->core_cycle();
+ 	               *active_sms+=m_cluster[i]->get_n_active_sms();
+ 	         } else {
+				 m_cluster[i]->no_tick();
+			 }
+ 	         // Update core icnt/cache stats for GPUWattch
+ 	         m_cluster[i]->get_icnt_stats(m_power_stats->pwr_mem_stat->n_simt_to_mem[CURRENT_STAT_IDX][i], m_power_stats->pwr_mem_stat->n_mem_to_simt[CURRENT_STAT_IDX][i]);
+ 	         m_cluster[i]->get_cache_stats(m_power_stats->pwr_mem_stat->core_cache_stats[CURRENT_STAT_IDX]);
+ 		 }
+       }
+   }
+
+   if (clock_mask & GPU) {
       // L1 cache + shader core pipeline stages
       m_power_stats->pwr_mem_stat->core_cache_stats[CURRENT_STAT_IDX].clear();
-      for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
-         if (m_cluster[i]->get_not_completed() || get_more_cta_left() ) {
-               m_cluster[i]->core_cycle();
-               *active_sms+=m_cluster[i]->get_n_active_sms();
-         }
-         // Update core icnt/cache stats for GPUWattch
-         m_cluster[i]->get_icnt_stats(m_power_stats->pwr_mem_stat->n_simt_to_mem[CURRENT_STAT_IDX][i], m_power_stats->pwr_mem_stat->n_mem_to_simt[CURRENT_STAT_IDX][i]);
-         m_cluster[i]->get_cache_stats(m_power_stats->pwr_mem_stat->core_cache_stats[CURRENT_STAT_IDX]);
-      }
+
       float temp=0;
       for (unsigned i=0;i<m_shader_config->num_shader();i++){
         temp+=m_shader_stats->m_pipeline_duty_cycle[i];
