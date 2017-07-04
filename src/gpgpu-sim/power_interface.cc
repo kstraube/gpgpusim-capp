@@ -93,8 +93,9 @@ void mcpat_cycle(const gpgpu_sim_config &config, const struct shader_core_config
 		//Average active lanes for sp and sfu pipelines
 		float avg_sp_active_lanes=(power_stats->get_sp_active_lanes())/stat_sample_freq;
 		float avg_sfu_active_lanes=(power_stats->get_sfu_active_lanes())/stat_sample_freq;
-		assert(avg_sp_active_lanes<=32);
-		assert(avg_sfu_active_lanes<=32);
+		//assert(avg_sp_active_lanes<=32);
+		//assert(avg_sfu_active_lanes<=32);
+		// Note: Above ok if boosting > nominal freq.
 		wrapper->set_active_lanes_power((power_stats->get_sp_active_lanes())/stat_sample_freq,
 				(power_stats->get_sfu_active_lanes())/stat_sample_freq);
 

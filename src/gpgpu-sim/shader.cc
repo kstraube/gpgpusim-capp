@@ -3253,10 +3253,15 @@ simt_core_cluster::simt_core_cluster( class gpgpu_sim *gpu,
         m_core[i] = new shader_core_ctx(gpu,this,sid,m_cluster_id,config,mem_config,stats);
         m_core_sim_order.push_back(i);
     }
+    m_core_time = 0;
 }
 
 void simt_core_cluster::core_cycle()
 {
+    m_core_time += m_clock_period;
+    assert(m_ticking);
+    m_ticking = false;
+
     for( std::list<unsigned>::iterator it = m_core_sim_order.begin(); it != m_core_sim_order.end(); ++it ) {
         m_core[*it]->cycle();
     }
