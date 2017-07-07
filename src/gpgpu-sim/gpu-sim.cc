@@ -1375,6 +1375,10 @@ void gpgpu_sim::issue_block2core()
     }
 }
 
+int compareu(const void* a, const void* b) {
+	return *(int*)a - *(int*)b;
+}
+
 unsigned long long g_single_step=0; // set this in gdb to single step the pipeline
 
 void gpgpu_sim::cycle()
@@ -1525,14 +1529,27 @@ void gpgpu_sim::cycle()
             myoutput.open("core_stats.bin", ios::out | ios::binary | ios::trunc);
 			myoutput << "Jason's weird file....." << get_config().num_shader();
          }
-
+		 int *insts = new int[get_config().num_shader()];
          for (int i=0; i<get_config().num_shader(); i++) {
 			int d = m_shader_stats->m_num_sim_insn[i] - m_shader_stats->m_num_sim_insn_last[i];
+			insts[i] = d;
 			m_shader_stats->m_num_sim_insn_last[i] = m_shader_stats->m_num_sim_insn[i];
 			assert(d >= 0);
 			assert(d < 1000000);
             myoutput.write(reinterpret_cast<char*>(&d), sizeof(d));
          }
+		 qsort(insts, get_config().num_shader(), sizeof(int), &compareu);
+		 int median = get_config().num_shader()%2 ?
+		 					insts[get_config().num_shader()/2] :
+							(insts[get_config().num_shader()/2] +
+								insts[get_config().num_shader()/2-1])/2;
+		 for (int i=0; i<get_config().num_shader(); i++) {
+			 if (insts[i] >= median) {
+				 m_cluster[i]->set_clock_period(m_config.core_period * 1.25);
+			 } else {
+				 m_cluster[i]->set_clock_period(m_config.core_period * 0.75);
+			 }
+		 }
 		 for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
 			m_cluster[i]->printReadyWarps(myoutput);
 		 }
