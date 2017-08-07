@@ -73,13 +73,13 @@ class Processor : public Component
     ProcParam procdynp;
 	  //for debugging nonlinear model
 		double dyn_power_before_scaling;
-    
+
     //wire	globalInterconnect;
     //clock_network globalClock;
     Component core, l2, l3, l1dir, l2dir, noc, mcs, cc, nius, pcies,flashcontrollers;
     int  numCore, numL2, numL3, numNOC, numL1Dir, numL2Dir;
     Processor(ParseXML *XML_interface);
-    void compute();
+    std::vector<double> compute(std::vector<double> curr_freqs);
     void set_proc_param();
     void visualizer_print( gzFile visualizer_file );
     void displayEnergy(uint32_t indent = 0,int plevel = 100, bool is_tdp_parm=true);
@@ -140,7 +140,7 @@ class Processor : public Component
     	  read_coef = l2array[0]->unicache.caches->local_result.power.readOp.dynamic;
 		return read_coef;
 	 }
-	 
+
 	 double get_coefficient_l2_read_misses(){
       double read_coef=0;
       if(XML->sys.number_of_L2s>0)
@@ -276,7 +276,7 @@ class Processor : public Component
 		value+=mc->dram->dramp.pre_coeff;
 		//return 0.4*value;
 		return value;
-		
+
 	 }
 
 	 //nonlinear scale

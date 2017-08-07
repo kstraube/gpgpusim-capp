@@ -71,7 +71,7 @@
 //-gpgpu_operand_collector_num_out_ports_gen                    0 # number of collector unit in ports (default = 0)
 
 //The total number of collector units and their input ports, and the number of register file banks
-//determine the crossbar size. 
+//determine the crossbar size.
 
 InstFetchU::InstFetchU(ParseXML* XML_interface, int ithCore_, InputParameter* interface_ip_, const CoreDynParam & dyn_p_, bool exist_)
 :XML(XML_interface),
@@ -730,13 +730,13 @@ LoadStoreU::LoadStoreU(ParseXML* XML_interface, int ithCore_, InputParameter* in
 	  interface_ip.is_cache			   = true;
 	  interface_ip.pure_cam            = false;
 	  interface_ip.pure_ram            = false;
-	 
+
 
 	  //Crossbar based interconnect for shared memory accesses, added by Syed
 	  //Crossbar
 
 	  if(XML->sys.architecture==1){
-    xbar_shared     = new Crossbar(coredynp.num_fpus,coredynp.num_fpus,32,&(g_tp.peri_global));//Syed: coredynp.num_fpus is used as simd_width  
+    xbar_shared     = new Crossbar(coredynp.num_fpus,coredynp.num_fpus,32,&(g_tp.peri_global));//Syed: coredynp.num_fpus is used as simd_width
 	  }
 	  else{
 	  xbar_shared     = new Crossbar(coredynp.num_fpus,coredynp.num_fpus,32,&(g_tp.peri_global));//Syed: coredynp.num_fpus is used as simd_width
@@ -885,7 +885,7 @@ LoadStoreU::LoadStoreU(ParseXML* XML_interface, int ithCore_, InputParameter* in
 
    /*
     * ccache starts here
-    */   
+    */
     //Constant cache
 	  size                             = (int)XML->sys.core[ithCore].ccache.dcache_config[0];
 	  line                             = (int)XML->sys.core[ithCore].ccache.dcache_config[1];
@@ -1028,7 +1028,7 @@ LoadStoreU::LoadStoreU(ParseXML* XML_interface, int ithCore_, InputParameter* in
 
    /*
     * tcache starts here
-    */   
+    */
     //Texture cache
 	  size                             = (int)XML->sys.core[ithCore].tcache.dcache_config[0];
 	  line                             = (int)XML->sys.core[ithCore].tcache.dcache_config[1];
@@ -1173,7 +1173,7 @@ LoadStoreU::LoadStoreU(ParseXML* XML_interface, int ithCore_, InputParameter* in
 
    /*
     * dcache starts here
-    */   
+    */
     //Dcache
 	  size                             = (int)XML->sys.core[ithCore].dcache.dcache_config[0];
 	  line                             = (int)XML->sys.core[ithCore].dcache.dcache_config[1];
@@ -1475,9 +1475,9 @@ RegFU::RegFU(ParseXML* XML_interface, int ithCore_, InputParameter* interface_ip
   /*********************************************************************************
 	* OC stage modelling (Syed Gilani)
 	*********************************************************************************/
-  
+
   //Crossbar
- 
+
 	if(XML->sys.architecture==1){
   xbar_rfu     = new Crossbar(XML->sys.core[ithCore].rf_banks/2,XML->sys.core[ithCore].collector_units/2
 		                 ,(128),&(g_tp.peri_global));
@@ -1756,7 +1756,7 @@ EXECU::EXECU(ParseXML* XML_interface, int ithCore_, InputParameter* interface_ip
 					  false, 1.0, coredynp.opt_local, coredynp.core_ty);
 			  bypass.area.set_area(bypass.area.get_area()  +fpTagBypass->area.get_area());
 		  }*/
-	  } /* if (coredynp.core_ty==Inorder) */ 
+	  } /* if (coredynp.core_ty==Inorder) */
 	  else
 	  {//OOO
 		  if (coredynp.scheu_ty==PhysicalRegFile)
@@ -1834,10 +1834,10 @@ EXECU::EXECU(ParseXML* XML_interface, int ithCore_, InputParameter* interface_ip
 				  bypass.area.set_area(bypass.area.get_area() +fp_bypass->area.get_area());
 				  bypass.area.set_area(bypass.area.get_area() +fpTagBypass->area.get_area());
 			  }
-		  } /* else */ 
+		  } /* else */
 
 
-	  } /* else */ 
+	  } /* else */
 	  area.set_area(area.get_area()/*+ bypass.area.get_area()*/);
 }
 
@@ -2332,8 +2332,8 @@ Core::Core(ParseXML* XML_interface, int ithCore_, InputParameter* interface_ip_)
   //XML->sys.core[ithCore].simd_width=8;// (8)
   //XML->sys.core[ithCore].collector_units=4;// (4)
   //XML->sys.core[ithCore].core_clock_ratio=2.0;// (2.0)
-  //XML->sys.core[ithCore].warp_size=32;// (32) 
-  
+  //XML->sys.core[ithCore].warp_size=32;// (32)
+
   /*
   * initialize, compute and optimize individual components.
   */
@@ -2358,7 +2358,7 @@ Core::Core(ParseXML* XML_interface, int ithCore_, InputParameter* interface_ip_)
   lsu          = new LoadStoreU(XML, ithCore, &interface_ip,coredynp);
   mmu          = new MemManU   (XML, ithCore, &interface_ip,coredynp);
   exu          = new EXECU     (XML, ithCore, &interface_ip,lsu->lsq_height, coredynp, exClockRate,true);
-  
+
 
 
 
@@ -2641,7 +2641,7 @@ void InstFetchU::computeEnergy(bool is_tdp)
     	ID_misc->tdp_stats = ID_misc->stats_t;
 
 
-   
+
 	 } /* if (is_tdp) */
     else
     {
@@ -2703,6 +2703,7 @@ void InstFetchU::computeEnergy(bool is_tdp)
     		//icache.caches->stats_t.readAc.miss*icache.caches->local_result.tag_array2->power.readOp.dynamic+
     		icache.caches->stats_t.readAc.miss*icache.caches->local_result.power.readOp.dynamic+ //assume tag data accessed in parallel
     		icache.caches->stats_t.readAc.miss*icache.caches->local_result.power.writeOp.dynamic); //read miss in Icache cause a write to Icache
+    // cout << "(I$ read acc - read miss)*"
     icache.power_t.readOp.dynamic	+=  icache.missb->stats_t.readAc.access*icache.missb->local_result.power.searchOp.dynamic +
             icache.missb->stats_t.writeAc.access*icache.missb->local_result.power.writeOp.dynamic;//each access to missb involves a CAM and a write
     icache.power_t.readOp.dynamic	+=  icache.ifb->stats_t.readAc.access*icache.ifb->local_result.power.searchOp.dynamic +
@@ -2753,7 +2754,7 @@ void InstFetchU::computeEnergy(bool is_tdp)
     	power = power + (ID_inst->power +
 							ID_operand->power +
 							ID_misc->power);
-	 } /* if (is_tdp) */ 
+	 } /* if (is_tdp) */
     else
     {
 //    	icache.rt_power = icache.power_t +
@@ -3611,7 +3612,7 @@ void LoadStoreU::computeEnergy(bool is_tdp)
 
 	//RF crossbar power (Syed)
 	xbar_shared->compute_power();
-   
+
 	if (is_tdp)
 	    {
 
@@ -3912,7 +3913,7 @@ void LoadStoreU::computeEnergy(bool is_tdp)
     ccache.power_t.readOp.dynamic	+= (ccache.caches->stats_t.readAc.hit*ccache.caches->local_result.power.readOp.dynamic+
     		ccache.caches->stats_t.readAc.miss*ccache.caches->local_result.power.readOp.dynamic+
     		ccache.caches->stats_t.writeAc.miss*ccache.caches->local_result.tag_array2->power.readOp.dynamic+
-    		ccache.caches->stats_t.writeAc.access*ccache.caches->local_result.power.writeOp.dynamic + 
+    		ccache.caches->stats_t.writeAc.access*ccache.caches->local_result.power.writeOp.dynamic +
 			xbar_shared->power.readOp.dynamic*(ccache.caches->stats_t.readAc.hit));
 
     tcache.power_t.readOp.dynamic	+= (tcache.caches->stats_t.readAc.hit*tcache.caches->local_result.power.readOp.dynamic+
@@ -4173,7 +4174,7 @@ void LoadStoreU::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 		cout << indent_str_next << "Gate Leakage = " << tcache.power.readOp.gate_leakage << " W" << endl;
 		cout << indent_str_next << "Runtime Dynamic = " << tcache.rt_power.readOp.dynamic/executionTime << " W" << endl;
 		cout <<endl;
-		
+
     if (coredynp.core_ty==Inorder)
 		{
 			cout << indent_str << "Load/Store Queue:" << endl;
@@ -4228,7 +4229,7 @@ void LoadStoreU::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 		cout << indent_str_next << "Texture Cache    Peak Dynamic = " << tcache.rt_power.readOp.dynamic*clockRate << " W" << endl;
 		cout << indent_str_next << "Texture Cache    Subthreshold Leakage = " << tcache.rt_power.readOp.leakage <<" W" << endl;
 		cout << indent_str_next << "Texture Cache    Gate Leakage = " << tcache.rt_power.readOp.gate_leakage << " W" << endl;
-		
+
     if (coredynp.core_ty==Inorder)
 		{
 			cout << indent_str_next << "Load/Store Queue   Peak Dynamic = " << LSQ->rt_power.readOp.dynamic*clockRate  << " W" << endl;
@@ -4357,7 +4358,7 @@ void RegFU::computeEnergy(bool is_tdp)
 
 
  //Arbiter power
- arbiter_rfu->compute_power(); 
+ arbiter_rfu->compute_power();
 
 	if (is_tdp)
     {
@@ -4387,7 +4388,7 @@ void RegFU::computeEnergy(bool is_tdp)
         	RFWIN->stats_t.writeAc.access  = 0;//0.5*RFWIN->l_ip.num_rw_ports;
         	RFWIN->tdp_stats = RFWIN->stats_t;
     	}
-	 } /* if (is_tdp) */ 
+	 } /* if (is_tdp) */
     else
     {
     	//init stats for Runtime Dynamic (RTP)
@@ -4396,7 +4397,7 @@ void RegFU::computeEnergy(bool is_tdp)
 		// Also, for a SIMD width of 8 and warp size of 32 threads, 4 accesses
 		// (each accessing 2 banks) need to be performed per operand
 if (XML->sys.architecture==1){
-    	IRF->stats_t.readAc.access  = (XML->sys.core[ithCore].int_regfile_reads/32)*(4*2);///1.5; 
+    	IRF->stats_t.readAc.access  = (XML->sys.core[ithCore].int_regfile_reads/32)*(4*2);///1.5;
     	IRF->stats_t.writeAc.access  = (XML->sys.core[ithCore].int_regfile_writes/32)*(4*2);///1.5;
 } else {
     	IRF->stats_t.readAc.access  = (XML->sys.core[ithCore].int_regfile_reads/32)*(2*4);///1.5;//TODO: no diff on archi and phy
@@ -4433,7 +4434,7 @@ if (XML->sys.architecture==1){
 	//IRF->power_t  =  IRF->power_t + IRF->local_result.power;// + xbar_rfu->power + arbiter_rfu->power;
 
 
-	
+
 	IRF->power_t.readOp.dynamic  =  (IRF->stats_t.readAc.access*IRF->local_result.power.readOp.dynamic
 			+IRF->stats_t.writeAc.access*IRF->local_result.power.writeOp.dynamic);
 	OPC->power_t.readOp.dynamic  =  (OPC->stats_t.readAc.access*OPC->local_result.power.readOp.dynamic);
@@ -4462,7 +4463,7 @@ if (XML->sys.architecture==1){
 	  OPC->power = (OPC->power_t) + OPC->local_result.power *pppm_lkg_banks;
 	  OPC->power.readOp.dynamic=OPC->power_t.readOp.dynamic*1;
 
-	  
+
 	  power	    =  power + (IRF->power+OPC->power);
 
 
@@ -4471,7 +4472,7 @@ if (XML->sys.architecture==1){
 			RFWIN->power = RFWIN->power_t + RFWIN->local_result.power *pppm_lkg;
 			power        = power + RFWIN->power;
 		}
-	} /* if (is_tdp) */	
+	} /* if (is_tdp) */
 	else
 	{
 	  //Removed *coredynp.pppm_lkg_multhread since all hardware threads shared the same IRF
@@ -4522,7 +4523,7 @@ void RegFU::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 		cout << indent_str_next << "Gate Leakage = " << xbar_rfu->power.readOp.gate_leakage << " W" << endl;
 		cout << indent_str_next << "Runtime Dynamic = " << xbar_rfu->rt_power.readOp.dynamic/executionTime << " W" << endl;
 		cout <<endl;
-      
+
 		cout << indent_str << "Arbiter (Integer RF):" << endl;
 		cout << indent_str_next << "Area = " << arbiter_rfu->area.get_area()*1e-6<< " mm^2" << endl;
 		cout << indent_str_next << "Peak Dynamic = " << arbiter_rfu->power.readOp.dynamic*clockRate << " W" << endl;
@@ -4619,7 +4620,7 @@ void EXECU::computeEnergy(bool is_tdp)
 		if (coredynp.num_fpus>0)
 		{
 			set_pppm(pppm_t, 3*coredynp.FPU_cdb_duty_cycle, 3, 3, 3*coredynp.FPU_cdb_duty_cycle);//3 means three source operands needs to be passed for each fp instruction.
-			//No conventional bypassing in GPU (Syed)			
+			//No conventional bypassing in GPU (Syed)
 			//bypass.power = bypass.power + fp_bypass->power*pppm_t  + fpTagBypass->power*pppm_t ;
 			power      = power + fp_u->power*pppm_freqScaling;
 
@@ -4729,7 +4730,7 @@ void EXECU::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 
 
 //Jingwen
-void Core::compute()
+void Core::compute(double curr_freq)
 {
     //power_point_product_masks
     double pppm_t[4]    = {1,1,1,1};
@@ -4737,7 +4738,7 @@ void Core::compute()
     double num_units = 4.0;
     Pipeline_energy=0;
 
-	 //Set pipeline duty cycle for this inteval 
+	 //Set pipeline duty cycle for this inteval
 	coredynp.pipeline_duty_cycle=XML->sys.core[ithCore].pipeline_duty_cycle;
     rt_power.reset();
     ifu->rt_power.reset();
@@ -4745,6 +4746,8 @@ void Core::compute()
     mmu->rt_power.reset();
     exu->rt_power.reset();
 
+    coredynp.clockRate = curr_freq * 1e6;
+    clockRate = curr_freq;
 
 		ifu->computeEnergy(false);
 		lsu->computeEnergy(false);
@@ -4767,7 +4770,7 @@ void Core::compute()
 				exit(1);
 			}
 		}
-      
+
 		set_pppm(pppm_t, coredynp.num_pipelines*rtp_pipeline_coe/num_units, coredynp.num_pipelines/num_units, coredynp.num_pipelines/num_units, coredynp.num_pipelines/num_units);
 
 		if (ifu->exist)
@@ -4776,7 +4779,7 @@ void Core::compute()
 			ifu->rt_power = ifu->rt_power + corepipe->power*pppm_t;
 			rt_power     = rt_power + ifu->rt_power ;
 		}
-    
+
 		if (lsu->exist)
 		{
 			Pipeline_energy+=corepipe->power.readOp.dynamic* (coredynp.num_pipelines*rtp_pipeline_coe/num_units);
@@ -4797,7 +4800,7 @@ void Core::compute()
 		}
 
 		rt_power     = rt_power +  undiffCore->power;
-    
+
 
 		if (XML->sys.Private_L2)
 		{
@@ -4805,7 +4808,7 @@ void Core::compute()
 			l2cache->computeEnergy(false);
 			rt_power = rt_power  + l2cache->rt_power;
 		}
-		
+
 		IdleCoreEnergy=XML->sys.num_idle_cores * XML->sys.idle_core_power* executionTime;
 
 		rt_power.readOp.dynamic += IdleCoreEnergy;
@@ -4831,7 +4834,7 @@ void Core::computeEnergy(bool is_tdp)
     {
        rtp_pipeline_coe = coredynp.pipeline_duty_cycle * coredynp.total_cycles;
     }
- 
+
 
 	if (is_tdp)
 	{
@@ -4878,18 +4881,18 @@ void Core::computeEnergy(bool is_tdp)
 			set_pppm(pppm_t, coredynp.num_pipelines/num_units*coredynp.ALU_duty_cycle, coredynp.num_pipelines/num_units, coredynp.num_pipelines/num_units, coredynp.num_pipelines/num_units);
 			//cout<<"ExPowerScalingFactor:"<<coredynp.num_pipelines/num_units*coredynp.ALU_duty_cycle<<endl;
 			exu->power = exu->power + corepipe->power*pppm_t;
-//			cout << "EXE = " << exu->power.readOp.dynamic*clockRate  << " W" << endl;
+			cout << "EXE = " << exu->power.readOp.dynamic << "*clockRate"  << " W" << endl;
 			power     = power + exu->power;
-//			cout << "core = " << power.readOp.dynamic*clockRate  << " W" << endl;
+			cout << "core = " << power.readOp.dynamic << "*clockRate"  << " W" << endl;
 		}
 		if (mmu->exist)
 		{
 			Pipeline_energy+=corepipe->power.readOp.dynamic* (coredynp.num_pipelines*rtp_pipeline_coe/num_units);
 			set_pppm(pppm_t, coredynp.num_pipelines/num_units*(0.5+0.5*coredynp.LSU_duty_cycle), coredynp.num_pipelines/num_units, coredynp.num_pipelines/num_units, coredynp.num_pipelines/num_units);
 			mmu->power = mmu->power + corepipe->power*pppm_t;
-//			cout << "MMU = " << mmu->power.readOp.dynamic*clockRate  << " W" << endl;
+			cout << "MMU = " << mmu->power.readOp.dynamic << "*clockRate"  << " W" << endl;
 			power     = power +  mmu->power;
-//			cout << "core = " << power.readOp.dynamic*clockRate  << " W" << endl;
+			cout << "core = " << power.readOp.dynamic << "*clockRate"  << " W" << endl;
 		}
 
 		power     = power +  undiffCore->power;

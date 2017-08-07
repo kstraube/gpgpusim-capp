@@ -602,13 +602,13 @@ void gpgpu_sim_wrapper::update_components_power()
 	}
 	bool check=false;
 	check=sanity_check(sum_pwr_cmp,proc_power);
-	assert("Total Power does not equal the sum of the components\n" && (check));
+	//assert("Total Power does not equal the sum of the components\n" && (check));
 
 }
 
-void gpgpu_sim_wrapper::compute()
+std::vector<double> gpgpu_sim_wrapper::compute(std::vector<double> curr_freqs)
 {
-	proc->compute();
+	return proc->compute(curr_freqs);
 }
 void gpgpu_sim_wrapper::print_power_kernel_stats(double gpu_sim_cycle, double gpu_tot_sim_cycle, double init_value, const std::string & kernel_info_string, bool print_trace)
 {

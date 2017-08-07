@@ -62,7 +62,7 @@ public:
 	void detect_print_steady_state(int position, double init_val);
 	void close_files();
 	void open_files();
-	void compute();
+	std::vector<double> compute(std::vector<double> curr_freqs);
 	void dump();
 	void print_trace_files();
 	void update_components_power();

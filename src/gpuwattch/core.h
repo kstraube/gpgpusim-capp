@@ -491,7 +491,7 @@ class Core :public Component {
 
 
 
-	void compute();
+	void compute(double curr_freq);
 	~Core();
 };
 
