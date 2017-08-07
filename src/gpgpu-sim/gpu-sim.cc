@@ -624,6 +624,7 @@ gpgpu_sim::gpgpu_sim( const gpgpu_sim_config &config )
 
 
     m_cluster = new simt_core_cluster*[m_shader_config->n_simt_clusters];
+		std::vector<double> cluster_freqs(0,m_shader_config->n_simt_clusters);
     for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++)
         m_cluster[i] = new simt_core_cluster(this,i,m_shader_config,m_memory_config,m_shader_stats,m_memory_stats);
 
@@ -1384,6 +1385,7 @@ unsigned long long g_single_step=0; // set this in gdb to single step the pipeli
 void gpgpu_sim::cycle()
 {
    int clock_mask = next_clock_domain();
+	 std::vector<double> curr_powers;
 
    if (clock_mask & CORE ) {
        // shader core loading (pop from ICNT into core) follows CORE clock
@@ -1483,7 +1485,11 @@ void gpgpu_sim::cycle()
       // McPAT main cycle (interface with McPAT)
 #ifdef GPGPUSIM_POWER_MODEL
       if(m_config.g_power_simulation_enabled){
-          mcpat_cycle(m_config, getShaderCoreConfig(), m_gpgpusim_wrapper, m_power_stats, m_config.gpu_stat_sample_freq, gpu_tot_sim_cycle, gpu_sim_cycle, gpu_tot_sim_insn, gpu_sim_insn);
+				  for (int i=0; i<get_config().num_shader(); i++) {
+						  cluster_freqs.push_back(m_cluster[i]->get_clock_period());
+					}
+          curr_powers = mcpat_cycle(m_config, getShaderCoreConfig(), m_gpgpusim_wrapper, m_power_stats, m_config.gpu_stat_sample_freq, gpu_tot_sim_cycle, gpu_sim_cycle, gpu_tot_sim_insn, gpu_sim_insn,cluster_freqs);
+					cout << "power = " << curr_powers.size() <<endl;
       }
 #endif
 

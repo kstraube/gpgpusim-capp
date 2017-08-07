@@ -454,6 +454,7 @@ private:
    class memory_sub_partition **m_memory_sub_partition;
 
    std::vector<kernel_info_t*> m_running_kernels;
+   std::vector<double>cluster_freqs;
    unsigned m_last_issued_kernel;
 
    std::list<unsigned> m_finished_kernel;

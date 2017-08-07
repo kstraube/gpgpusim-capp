@@ -38,13 +38,14 @@ void init_mcpat(const gpgpu_sim_config &config, class gpgpu_sim_wrapper *wrapper
 
 }
 
-void mcpat_cycle(const gpgpu_sim_config &config, const struct shader_core_config *shdr_config, class gpgpu_sim_wrapper *wrapper, class power_stat_t *power_stats, unsigned stat_sample_freq, unsigned tot_cycle, unsigned cycle, unsigned tot_inst, unsigned inst){
+std::vector<double> mcpat_cycle(const gpgpu_sim_config &config, const struct shader_core_config *shdr_config, class gpgpu_sim_wrapper *wrapper, class power_stat_t *power_stats, unsigned stat_sample_freq, unsigned tot_cycle, unsigned cycle, unsigned tot_inst, unsigned inst, std::vector<double> cluster_freqs){
 
 	static bool mcpat_init=true;
+	std::vector<double> powerOut;
 
 	if(mcpat_init){ // If first cycle, don't have any power numbers yet
 		mcpat_init=false;
-		return;
+		return powerOut;
 	}
 
 	if ((tot_cycle+cycle) % stat_sample_freq == 0) {
@@ -104,7 +105,7 @@ void mcpat_cycle(const gpgpu_sim_config &config, const struct shader_core_config
 		double n_icnt_mem_to_simt = (double)power_stats->get_icnt_mem_to_simt(); // # flits from memory partitions to SIMT clusters
 		wrapper->set_NoC_power(n_icnt_mem_to_simt, n_icnt_simt_to_mem); // Number of flits traversing the interconnect
 
-		wrapper->compute();
+		powerOut = wrapper->compute(cluster_freqs);
 
 
 		wrapper->update_components_power();
@@ -119,6 +120,7 @@ void mcpat_cycle(const gpgpu_sim_config &config, const struct shader_core_config
 		wrapper->dump();
 	}
 	//wrapper->close_files();
+	return powerOut;
 }
 
 void mcpat_reset_perf_count(class gpgpu_sim_wrapper *wrapper){
