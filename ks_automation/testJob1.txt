@@ -1,0 +1,11 @@
+%%%%%%%job1_ff700_take2
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.h=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim_ff700.h
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.cc=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim.cc
+-------------------------
+%%%%%%%job1_ff500
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.h=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim_ff500.h
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.cc=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim.cc
+-------------------------
+%%%%%%%job1_ff900
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.h=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim_ff900.h
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.cc=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim.cc

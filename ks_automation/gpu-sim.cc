@@ -1400,11 +1400,11 @@ void gpgpu_sim::cycle()
 	 int thresholdUp = 60;
 	 double tot_power = 0;
 	 int thresholdDown = 40;
-	 double minPeriod = 6.666e-10; //1500 MHz
-	 double maxPeriod = 1e-8; //100 MHz
+	 double minPeriod = 1.1111e-9; //900 MHz
+	 double maxPeriod = 2e-9; //500 MHz
 	 double TDP_target = 80;
-	  std::vector<int> allFreqs = {1500,1400,1300,1200,1100,1000,900,800,700,600,500,400,300,200,100};
-	  std::vector<double> allVoltages = {1.65,1.575,1.5,1.425,1.35,1.275,1.2,1.125,1.05,0.975,0.9,0.825,0.75,0.675,0.6};
+	  std::vector<int> allFreqs = {900,800,700,600,500};
+	  std::vector<double> allVoltages = {1.2,1.125,1.05,0.975,0.9};
    int clock_mask = next_clock_domain();
 	 std::vector<double> curr_powers;
 

@@ -440,8 +440,9 @@ Processor::Processor(ParseXML *XML_interface)
 //  globalClock.optimize_wire();
 }
 
-std::vector<double> Processor::compute(std::vector<double> curr_freqs)
+std::vector<double> Processor::compute(double curr_freq)
 {
+  cout << " PROC COMPUTE" << numCore << endl;
   int i;
   double pppm_t[4]    = {1,1,1,1};
   std::vector<double> powersOut;
@@ -453,10 +454,10 @@ std::vector<double> Processor::compute(std::vector<double> curr_freqs)
   core.rt_power.reset();
   for (i = 0;i < numCore; i++)
   {
-      cores[i]->executionTime = XML->sys.total_cycles /(curr_freqs[i]*(1e6));
+      cores[i]->executionTime = XML->sys.total_cycles /(curr_freq*(1e6));
       //(XML->sys.core[i].clock_rate*1e6);
       cores[i]->rt_power.reset();
-		  cores[i]->compute(curr_freqs[i]);
+		  cores[i]->compute(curr_freq);
 		  //cores[i]->computeEnergy(false);
 		  if (procdynp.homoCore){
 			  set_pppm(pppm_t,1/cores[i]->executionTime, procdynp.numCore,procdynp.numCore,procdynp.numCore);
@@ -468,6 +469,10 @@ std::vector<double> Processor::compute(std::vector<double> curr_freqs)
 			  core.rt_power = core.rt_power + cores[i]->rt_power*pppm_t;
 			  rt_power = rt_power  + cores[i]->rt_power*pppm_t;
 		  }
+      cout << "executionTime: " << cores[i]->executionTime << endl;
+      //cout << "core raw" << cores[i]->rt_power.readOp.dynamic << endl;
+      cout << "FREQ: " << curr_freq << endl;
+      cout << "CORE POW" << i << " " << (cores[i]->rt_power*pppm_t).readOp.dynamic << endl;
       powersOut.push_back((cores[i]->rt_power*pppm_t).readOp.dynamic);
   }
 
@@ -633,6 +638,14 @@ std::vector<double> Processor::compute(std::vector<double> curr_freqs)
 //  globalClock.l_ip.with_clock_grid=false;//global clock does not drive local final nodes
 //  globalClock.optimize_wire();
 
+}
+
+void Processor::set_clock_rate(double new_clock_rate)
+{
+  for (unsigned i = 0;i < numCore; i++)
+  {
+    cores[i]->set_clock_rate(new_clock_rate);
+  }
 }
 
 void Processor::displayDeviceType(int device_type_, uint32_t indent)

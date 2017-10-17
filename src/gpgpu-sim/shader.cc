@@ -3315,6 +3315,14 @@ unsigned simt_core_cluster::get_n_active_sms() const
     return n;
 }
 
+unsigned simt_core_cluster::get_n_active_sms_per_core(int i) const
+{
+    // unsigned n=0;
+    // for( unsigned i=0; i < m_config->n_simt_cores_per_cluster; i++ )
+    //     n += m_core[i]->isactive();
+    return m_core[i]->isactive();
+}
+
 unsigned simt_core_cluster::issue_block2core()
 {
     unsigned num_blocks_issued=0;

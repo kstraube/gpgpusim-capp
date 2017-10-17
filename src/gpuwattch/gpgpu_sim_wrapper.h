@@ -62,7 +62,7 @@ public:
 	void detect_print_steady_state(int position, double init_val);
 	void close_files();
 	void open_files();
-	std::vector<double> compute(std::vector<double> curr_freqs);
+	std::vector<double> compute(double curr_freq);
 	void dump();
 	void print_trace_files();
 	void update_components_power();
@@ -70,6 +70,7 @@ public:
 	void reset_counters();
 	void print_power_kernel_stats(double gpu_sim_cycle, double gpu_tot_sim_cycle, double init_value, const std::string & kernel_info_string, bool print_trace);
 	void power_metrics_calculations();
+	void set_clock_rate(double new_clock_rate);
 	void set_inst_power(bool clk_gated_lanes, double tot_cycles, double busy_cycles, double tot_inst, double int_inst, double fp_inst, double load_inst, double store_inst, double committed_inst);
 	void set_regfile_power(double reads, double writes, double ops);
 	void set_icache_power(double accesses, double misses);

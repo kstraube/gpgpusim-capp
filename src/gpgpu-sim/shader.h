@@ -1904,6 +1904,7 @@ public:
     void print_not_completed( FILE *fp ) const;
     unsigned get_n_active_cta() const;
     unsigned get_n_active_sms() const;
+    unsigned get_n_active_sms_per_core(int i) const;
     gpgpu_sim *get_gpu() { return m_gpu; }
 
     void display_pipeline( unsigned sid, FILE *fout, int print_mem, int mask );

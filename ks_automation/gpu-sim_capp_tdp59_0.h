@@ -73,7 +73,7 @@
 #define CAPP_MAX_RATIO 1.0
 #define CAPP_MIN_RATIO 0.7
 #define MAX_PID_ERROR 100.0
-#define MAX_PID_VOLTAGE 2.5
+#define MAX_PID_VOLTAGE 2.0
 #define PID_TEST 0
 
 

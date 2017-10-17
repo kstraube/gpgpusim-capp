@@ -212,7 +212,7 @@ class RegFU :public Component {
 	ArrayST * RFWIN;
 	ArrayST * OPC;//Operand collectors
 	bool exist;
-   double exClockRate; 
+   double exClockRate;
 	//OC Modelling (Syed)
 	Crossbar * xbar_rfu;
    MCPAT_Arbiter * arbiter_rfu;
@@ -280,6 +280,7 @@ class Core :public Component {
     //clock_network	clockNetwork;
 	Core(ParseXML *XML_interface, int ithCore_, InputParameter* interface_ip_);
 	void set_core_param();
+  void set_clock_rate(double new_clock_rate);
 	void computeEnergy(bool is_tdp=true);
 	void displayEnergy(uint32_t indent = 0,int plevel = 100, bool is_tdp=true);
 

@@ -60,6 +60,10 @@ void power_mem_stat_t::init(){
     for(unsigned i=0; i<NUM_STAT_IDX; ++i){
         core_cache_stats[i].clear();
         l2_cache_stats[i].clear();
+				for(unsigned j=0; j<80; j++)
+				{
+					core_cache_stats_per_sm[i][j].clear();
+				}
 
         n_cmd[i] = (unsigned *)calloc(m_config->m_n_mem,sizeof(unsigned));
         n_activity[i] = (unsigned *)calloc(m_config->m_n_mem,sizeof(unsigned));
@@ -80,6 +84,10 @@ void power_mem_stat_t::save_stats(){
 
     core_cache_stats[PREV_STAT_IDX] = core_cache_stats[CURRENT_STAT_IDX];
     l2_cache_stats[PREV_STAT_IDX] = l2_cache_stats[CURRENT_STAT_IDX];
+
+		for(unsigned i=0; i<m_core_config->num_shader(); ++i){
+      core_cache_stats_per_sm[PREV_STAT_IDX][i] = core_cache_stats_per_sm[CURRENT_STAT_IDX][i];
+    }
 
     for(unsigned i=0; i<m_core_config->num_shader(); ++i){
         shmem_read_access[PREV_STAT_IDX][i] = shmem_read_access[CURRENT_STAT_IDX][i] ; 	// Shared memory access
@@ -290,4 +298,3 @@ void power_stat_t::print (FILE *fout) const
 	pwr_core_stat->print(fout);
 	pwr_mem_stat->print(fout);
 }
-

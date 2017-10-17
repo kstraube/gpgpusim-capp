@@ -2600,7 +2600,7 @@ void BranchPredictor::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 
 void InstFetchU::computeEnergy(bool is_tdp)
 {
-  executionTime=XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);//Syed
+  executionTime=XML->sys.total_cycles/(coredynp.clockRate*1e6);//(XML->sys.target_core_clockrate*1e6);//Syed
   //cout <<"IFU: execution time: "<<XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6)<<endl;
   //cout <<"IFU: total cycles"<<XML->sys.total_cycles<<endl;
 	if (!exist) return;
@@ -3608,7 +3608,7 @@ void LoadStoreU::computeEnergy(bool is_tdp)
 {
 	if (!exist) return;
 
-	executionTime=XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);//Syed
+	executionTime=XML->sys.total_cycles/(coredynp.clockRate*1e6);//(XML->sys.target_core_clockrate*1e6);//Syed
 
 	//RF crossbar power (Syed)
 	xbar_shared->compute_power();
@@ -4352,7 +4352,7 @@ void RegFU::computeEnergy(bool is_tdp)
  */
 	if (!exist) return;
 
-  executionTime=XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);//Syed
+  executionTime=XML->sys.total_cycles/(coredynp.clockRate*1e6);//(XML->sys.target_core_clockrate*1e6);//Syed
  //RF crossbar power (Syed Gilani)
  xbar_rfu->compute_power();
 
@@ -4580,7 +4580,7 @@ void EXECU::computeEnergy(bool is_tdp)
 	//Syed
 	double pppm_t[4]    = {1,1,1,1};
 	double pppm_freqScaling[4]    = {rf_fu_clockRate/clockRate,1,1,1};
-  executionTime=XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);//Syed
+  executionTime=XML->sys.total_cycles/(coredynp.clockRate*1e6);//(XML->sys.target_core_clockrate*1e6);//Syed
 
 
 //	rfu->power.reset();
@@ -4726,7 +4726,11 @@ void EXECU::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 
 
 
-
+void Core::set_clock_rate(double new_clock_rate)
+{
+  coredynp.clockRate = new_clock_rate * 1e6;
+  clockRate = new_clock_rate;
+}
 
 
 //Jingwen
@@ -4778,6 +4782,7 @@ void Core::compute(double curr_freq)
 			Pipeline_energy+=corepipe->power.readOp.dynamic* (coredynp.num_pipelines*rtp_pipeline_coe/num_units);
 			ifu->rt_power = ifu->rt_power + corepipe->power*pppm_t;
 			rt_power     = rt_power + ifu->rt_power ;
+      // cout << "ifu power:" << ifu->rt_power.readOp.dynamic << endl;
 		}
 
 		if (lsu->exist)
@@ -4785,21 +4790,26 @@ void Core::compute(double curr_freq)
 			Pipeline_energy+=corepipe->power.readOp.dynamic* (coredynp.num_pipelines*rtp_pipeline_coe/num_units);
 			lsu->rt_power = lsu->rt_power + corepipe->power*pppm_t;
 			rt_power     = rt_power  + lsu->rt_power;
+      // cout << "lsu power:" << lsu->rt_power.readOp.dynamic << endl;
 		}
 		if (exu->exist)
 		{
 			Pipeline_energy+=corepipe->power.readOp.dynamic* (coredynp.num_pipelines*rtp_pipeline_coe/num_units);
 			exu->rt_power = exu->rt_power + corepipe->power*pppm_t;
 			rt_power     = rt_power  + exu->rt_power;
+      // cout << "exu power:" << exu->rt_power.readOp.dynamic << endl;
 		}
 		if (mmu->exist)
 		{
 			Pipeline_energy+=corepipe->power.readOp.dynamic* (coredynp.num_pipelines*rtp_pipeline_coe/num_units);
 			mmu->rt_power = mmu->rt_power + corepipe->power*pppm_t;
 			rt_power     = rt_power +  mmu->rt_power ;
+      // cout << "mmu power:" << mmu->rt_power.readOp.dynamic << endl;
 		}
 
 		rt_power     = rt_power +  undiffCore->power;
+
+    // cout << "undiffCore power:" << undiffCore->power.readOp.dynamic << endl;
 
 
 		if (XML->sys.Private_L2)
@@ -4807,11 +4817,13 @@ void Core::compute(double curr_freq)
 
 			l2cache->computeEnergy(false);
 			rt_power = rt_power  + l2cache->rt_power;
+      // cout << "L2 power:" << l2cache->rt_power.readOp.dynamic << endl;
 		}
 
 		IdleCoreEnergy=XML->sys.num_idle_cores * XML->sys.idle_core_power* executionTime;
 
 		rt_power.readOp.dynamic += IdleCoreEnergy;
+    // cout << "idle energy:" << IdleCoreEnergy << endl;
 
 }
 

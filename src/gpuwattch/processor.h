@@ -79,7 +79,8 @@ class Processor : public Component
     Component core, l2, l3, l1dir, l2dir, noc, mcs, cc, nius, pcies,flashcontrollers;
     int  numCore, numL2, numL3, numNOC, numL1Dir, numL2Dir;
     Processor(ParseXML *XML_interface);
-    std::vector<double> compute(std::vector<double> curr_freqs);
+    std::vector<double> compute(double curr_freq);
+    void set_clock_rate(double new_clock_rate);
     void set_proc_param();
     void visualizer_print( gzFile visualizer_file );
     void displayEnergy(uint32_t indent = 0,int plevel = 100, bool is_tdp_parm=true);
