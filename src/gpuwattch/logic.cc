@@ -36,7 +36,7 @@
 *      Ahmed ElTantawy, University of British Columbia             *
 ********************************************************************/
 #include "logic.h"
-#define SP_BASE_POWER 0 
+#define SP_BASE_POWER 0
 #define SFU_BASE_POWER 0
 //.67
 
@@ -463,7 +463,7 @@ FunctionalUnit::FunctionalUnit(ParseXML *XML_interface, int ithCore_, InputParam
 		}
 		else if (fu_type == ALU)
 		{
-			num_fu=coredynp.num_alus;			
+			num_fu=coredynp.num_alus;
 			//FIXME: The first area_t = is from updated McAPAT, the second is from our changes (conflict from base)
 			//area_t = 280*260*g_tp.scaling_factor.logic_scaling_co_eff;//this is um^2 ALU + MUl
 			area_t = 71.85*71.85*num_fu*g_tp.scaling_factor.logic_scaling_co_eff;//this is um^2 ALU + MUl
@@ -498,13 +498,13 @@ FunctionalUnit::FunctionalUnit(ParseXML *XML_interface, int ithCore_, InputParam
 			exit(0);
 		}
 		per_access_energy *=0.5;//According to ARM data embedded processor has much lower per acc energy
-	} /* if (XML->sys.Embedded) */	
+	} /* if (XML->sys.Embedded) */
 	else
 	{
 		if (fu_type == FPU)
 		  		{
 			num_fu=coredynp.num_fpus;
-		
+
 			/*
 			num_fu/=2; //2 DP FPUs combine to for a SP FPU
 			//area_t = 8.47*1e6*g_tp.scaling_factor.logic_scaling_co_eff;//this is um^2
@@ -545,7 +545,7 @@ FunctionalUnit::FunctionalUnit(ParseXML *XML_interface, int ithCore_, InputParam
 			//ALU instrucitons are also executed on FPUs so add 10% overhead for supporting ALU instrcutions
 	   	leakage = 1.1*leakage;
 			//cout<<"FPU Per access erngy: "<<per_access_energy/2;
-			//Divide per access energy by 2 so we have 4 DP units capapble of 
+			//Divide per access energy by 2 so we have 4 DP units capapble of
 			//doing 8 SP operations
 			//per_access_energy = per_access_energy/2;
 			FU_height=(38667*num_fu)*interface_ip.F_sz_um;//FPU from Sun's data
@@ -609,8 +609,8 @@ FunctionalUnit::FunctionalUnit(ParseXML *XML_interface, int ithCore_, InputParam
 
 void FunctionalUnit::computeEnergy(bool is_tdp)
 {
- 
-  executionTime=XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);//Syed
+
+  executionTime=XML->sys.total_cycles/(coredynp.clockRate*1e6);//(XML->sys.target_core_clockrate*1e6);//Syed
 	double pppm_t[4]    = {1,1,1,1};
 	double FU_duty_cycle;
 	if (is_tdp)
@@ -677,7 +677,7 @@ void FunctionalUnit::computeEnergy(bool is_tdp)
 		}
 
 	    //rt_power.readOp.dynamic = base_energy*executionTime + energy*stats_t.readAc.access;
-	    
+
 		if(fu_type == ALU){
 		rt_power.readOp.dynamic = per_access_energy*stats_t.readAc.access + base_energy*executionTime;
 		}
@@ -698,7 +698,7 @@ void FunctionalUnit::computeEnergy(bool is_tdp)
 		    rt_power.readOp.dynamic += base_energy*executionTime*(32-XML->sys.core[ithCore].sfu_average_active_lanes);
 		}
 
-	} /* else */	
+	} /* else */
 
 
 

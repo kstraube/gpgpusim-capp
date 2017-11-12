@@ -440,10 +440,12 @@ Processor::Processor(ParseXML *XML_interface)
 //  globalClock.optimize_wire();
 }
 
-void Processor::compute () 
+std::vector<double> Processor::compute(double curr_freq)
 {
+  cout << " PROC COMPUTE" << numCore << endl;
   int i;
   double pppm_t[4]    = {1,1,1,1};
+  std::vector<double> powersOut;
 
   rt_power.reset();
   //power.reset();
@@ -452,9 +454,10 @@ void Processor::compute ()
   core.rt_power.reset();
   for (i = 0;i < numCore; i++)
   {
-      cores[i]->executionTime = XML->sys.total_cycles /(XML->sys.core[i].clock_rate*1e6); 
+      cores[i]->executionTime = XML->sys.total_cycles /(curr_freq*(1e6));
+      //(XML->sys.core[i].clock_rate*1e6);
       cores[i]->rt_power.reset();
-		  cores[i]->compute();
+		  cores[i]->compute(curr_freq);
 		  //cores[i]->computeEnergy(false);
 		  if (procdynp.homoCore){
 			  set_pppm(pppm_t,1/cores[i]->executionTime, procdynp.numCore,procdynp.numCore,procdynp.numCore);
@@ -466,6 +469,11 @@ void Processor::compute ()
 			  core.rt_power = core.rt_power + cores[i]->rt_power*pppm_t;
 			  rt_power = rt_power  + cores[i]->rt_power*pppm_t;
 		  }
+      cout << "executionTime: " << cores[i]->executionTime << endl;
+      //cout << "core raw" << cores[i]->rt_power.readOp.dynamic << endl;
+      cout << "FREQ: " << curr_freq << endl;
+      cout << "CORE POW" << i << " " << (cores[i]->rt_power*pppm_t).readOp.dynamic << endl;
+      powersOut.push_back((cores[i]->rt_power*pppm_t).readOp.dynamic);
   }
 
   if (!XML->sys.Private_L2)
@@ -561,9 +569,9 @@ void Processor::compute ()
 	  rt_power = rt_power  + mcs.rt_power;
 
   }
-  
 
-/*  
+
+/*
   if (XML->sys.flashc.number_mcs >0 )//flash controller
   {
 	  flashcontrollers.rt_power.reset();
@@ -595,10 +603,10 @@ void Processor::compute ()
 
   }
 
-	  
+
 	   // * Compute global links associated with each NOC, if any. This must be done at the end (even after the NOC router part) since the total chip
 	   // * area must be obtain to decide the link routing
-	  */ 
+	  */
 	  //Compute energy of NoC (w or w/o links) or buses
     noc.rt_power.reset();
 	  for (i = 0;i < numNOC; i++)
@@ -616,8 +624,11 @@ void Processor::compute ()
 			  noc.rt_power = noc.rt_power + nocs[i]->rt_power*pppm_t;
 			  rt_power = rt_power  + nocs[i]->rt_power*pppm_t;
 		  }
-	  } 
-    
+	  }
+
+  powersOut.push_back(rt_power.readOp.dynamic);
+  return powersOut;
+
 
 //  //clock power
 //  globalClock.init_wire_external(is_default, &interface_ip);
@@ -627,6 +638,14 @@ void Processor::compute ()
 //  globalClock.l_ip.with_clock_grid=false;//global clock does not drive local final nodes
 //  globalClock.optimize_wire();
 
+}
+
+void Processor::set_clock_rate(double new_clock_rate)
+{
+  for (unsigned i = 0;i < numCore; i++)
+  {
+    cores[i]->set_clock_rate(new_clock_rate);
+  }
 }
 
 void Processor::displayDeviceType(int device_type_, uint32_t indent)
@@ -1058,5 +1077,3 @@ Processor::~Processor(){
 		delete flashcontroller;
 	}
 };
-
-

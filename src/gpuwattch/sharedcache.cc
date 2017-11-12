@@ -56,7 +56,7 @@ SharedCache::SharedCache(ParseXML* XML_interface, int ithCache_, InputParameter*
 {
   int idx;
   int tag, data;
-  bool debug; 
+  bool debug;
   enum Device_ty device_t;
   enum Core_type  core_t;
   double size, line, assoc, banks;
@@ -781,7 +781,7 @@ void SharedCache::computeEnergy(bool is_tdp)
 	unicache.power_t.reset();
    unicache.rt_power.reset();
 	if (!((cachep.dir_ty==ST&& cacheL==L1Directory)||(cachep.dir_ty==ST&& cacheL==L2Directory)))
-	{ 
+	{
 
 	  unicache.power_t.readOp.dynamic	+= (unicache.caches->stats_t.readAc.hit*unicache.caches->local_result.power.readOp.dynamic+
 			unicache.caches->stats_t.readAc.miss*unicache.caches->local_result.tag_array2->power.readOp.dynamic+
@@ -1182,4 +1182,3 @@ void SharedCache::set_cache_param()
   }
   //cachep.cache_duty_cycle=cachep.dir_duty_cycle = 0.35;
 }
-

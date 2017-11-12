@@ -397,11 +397,11 @@ MCFrontEnd::MCFrontEnd(ParseXML *XML_interface,InputParameter* interface_ip_, co
   //TIDs are assumed to be 8 bits
 	  /*Contents of each PRT entry
 		*
-		*  Warp ID (6 bits) | Memory address (32 bits) per thread | Request Size (2-bits) per thread |   
+		*  Warp ID (6 bits) | Memory address (32 bits) per thread | Request Size (2-bits) per thread |
 		*  line size= 6+ 32*16 + 2*16  ~ 64 bytes
 		*
 		*
-		*/  
+		*/
   data    					 	   = 64;//Support key words first operation //8 means converting bit to Byte
   interface_ip.cache_sz            = data*XML->sys.mc.PRT_entries;//PRT table;
   interface_ip.line_sz             = data;
@@ -427,10 +427,10 @@ MCFrontEnd::MCFrontEnd(ParseXML *XML_interface,InputParameter* interface_ip_, co
   //***ThreadMasks storage (coalesced threads whose memory requests are satisfied by each memory access)
 	  /* contents of the thread masks Array
 		*  16-bit bit masks for up to 16 memory requests of a warp | Number of pending memory requests (5 bits)
-		*  
+		*
 		*  16*PRT_entry thread Mask, each entry has 16 mask bits.
 		*
-		*/  
+		*/
   data    					 	   = 2;
   interface_ip.cache_sz            = data*XML->sys.mc.PRT_entries*16;//PRT table;
   interface_ip.line_sz             = data;
@@ -453,9 +453,9 @@ MCFrontEnd::MCFrontEnd(ParseXML *XML_interface,InputParameter* interface_ip_, co
   area.set_area(area.get_area()+ threadMasks->local_result.area*XML->sys.mc.memory_channels_per_mc);
 
   //***Numer of pending requests per PRT entry
-	  /* 
+	  /*
 		* 1-byte data, PRT entries deep
-		*/  
+		*/
   data    					 	   = 1;
   interface_ip.cache_sz            = data*XML->sys.mc.PRT_entries;//PRT table;
   interface_ip.line_sz             = data;
@@ -519,11 +519,11 @@ void MCFrontEnd::computeEnergy(bool is_tdp)
 			PRT->stats_t.readAc.access = PRT->l_ip.num_rd_ports*mcp.frontend_duty_cycle;
 	    	PRT->stats_t.writeAc.access = PRT->l_ip.num_wr_ports*mcp.frontend_duty_cycle;
 	    	PRT->tdp_stats = PRT->stats_t;
-			
+
 			threadMasks->stats_t.readAc.access = threadMasks->l_ip.num_rd_ports*mcp.frontend_duty_cycle;
 	    	threadMasks->stats_t.writeAc.access = threadMasks->l_ip.num_wr_ports*mcp.frontend_duty_cycle;
 	    	threadMasks->tdp_stats = threadMasks->stats_t;
-			
+
 			PRC->stats_t.readAc.access = threadMasks->l_ip.num_rd_ports*mcp.frontend_duty_cycle;
 	    	PRC->stats_t.writeAc.access = threadMasks->l_ip.num_wr_ports*mcp.frontend_duty_cycle;
 	    	PRC->tdp_stats = threadMasks->stats_t;
@@ -546,7 +546,7 @@ void MCFrontEnd::computeEnergy(bool is_tdp)
 	    	writeBuffer->stats_t.readAc.access  = XML->sys.mc.memory_writes*mcp.llcBlockSize*8.0/mcp.dataBusWidth;
 	    	writeBuffer->stats_t.writeAc.access = XML->sys.mc.memory_writes*mcp.llcBlockSize*8.0/mcp.dataBusWidth;
 	    	writeBuffer->rtp_stats = writeBuffer->stats_t;
-	    	
+
 			//Pending request table
 			//Co-alesce all misses in caches and add an entry for them in PRT
 			//TODO: Change 0 to ithCore and move to LSU (Syed)
@@ -556,7 +556,7 @@ void MCFrontEnd::computeEnergy(bool is_tdp)
 	    	PRT->stats_t.writeAc.access = XML->sys.core[0].dcache.write_accesses + XML->sys.core[0].ccache.write_accesses +
 			                               XML->sys.core[0].tcache.write_accesses;
 	    	PRT->rtp_stats = PRT->stats_t;
-			
+
 			threadMasks->stats_t.readAc.access  = XML->sys.core[0].dcache.read_accesses + XML->sys.core[0].ccache.read_accesses +
 			                               XML->sys.core[0].tcache.read_accesses;
 	    	threadMasks->stats_t.writeAc.access = XML->sys.core[0].dcache.write_accesses + XML->sys.core[0].ccache.write_accesses +
@@ -621,7 +621,7 @@ void MCFrontEnd::computeEnergy(bool is_tdp)
     	        		readBuffer->local_result.power +
     	        		writeBuffer->local_result.power+PRT->local_result.power+
 						threadMasks->local_result.power+PRC->local_result.power)*pppm_lkg;
-		
+
 
     }
     else
@@ -806,7 +806,7 @@ void MemoryController::computeEnergy(bool is_tdp)
   mcp.executionTime   = XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6); //Jingwen
   frontend->mcp.executionTime   = XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6); //Jingwen
   transecEngine->mcp.executionTime  = XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6); //Jingwen
-  
+
   /*Jingwen: give stats for backend and phy */
   transecEngine->mcp.reads =XML->sys.mc.memory_reads;
   transecEngine->mcp.writes =XML->sys.mc.memory_writes;
@@ -990,4 +990,3 @@ MemoryController ::~MemoryController(){
 	if(PHY) 	                   {delete PHY; PHY = 0;}
 	if(pipeLogic) 	               {delete pipeLogic; pipeLogic = 0;}
 }
-
