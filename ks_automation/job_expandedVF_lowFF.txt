@@ -1,0 +1,15 @@
+%%%%%%%job2_expandedvf_ff200
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.h=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim_ff200.h
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.cc=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim_expandedVF.cc
+-------------------------
+%%%%%%%job2_expandedvf_ff300
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.h=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim_ff300.h
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.cc=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim_expandedVF.cc
+-------------------------
+%%%%%%%job2_expandedvf_ff400
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.h=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim_ff400.h
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.cc=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim_expandedVF.cc
+-------------------------
+%%%%%%%job2_expandedvf_ff600
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.h=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim_ff600.h
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.cc=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim_expandedVF.cc
