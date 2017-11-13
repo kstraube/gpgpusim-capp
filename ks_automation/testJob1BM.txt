@@ -1,0 +1,14 @@
+%%%%%%%job1_ff700_take2
+bms:pagerank_spmv,pagerank,color_max
+bmDirs:pagerank,pagerank,color
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.h=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim_ff700.h
+-------------------------
+%%%%%%%job1_ff500
+bms:pagerank_spmv,pagerank,color_maxmin
+bmDirs:pagerank,pagerank,color
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.h=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim_ff500.h
+-------------------------
+%%%%%%%job1_ff900
+bms:pagerank_spmv,bc,color_max
+bmDirs:pagerank,bc,color
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.h=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim_ff900.h

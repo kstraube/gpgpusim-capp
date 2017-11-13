@@ -1,0 +1,7 @@
+%%%%%%%job2_expandedvf_capp_59_0TDP
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.h=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim_capp_expandedvf_tdp59_0.h
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.cc=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim_expandedVF.cc
+-------------------------
+%%%%%%%job2_capp_59_0TDP
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.h=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim_capp_tdp59_0.h
+/home/kkstraube/gpgpu-sim/src/gpgpu-sim/gpu-sim.cc=/home/kkstraube/gpgpu-sim/ks_automation/gpu-sim.cc

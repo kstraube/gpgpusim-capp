@@ -1,0 +1,7 @@
+bm,maxpwr_mv100, 88% for TDP target
+color_max, 311, 273
+color_maxmin,309, 272
+fw, 81, 71
+mis, 225, 198
+pagerank, 67, 59
+pagerank_spmv,79, 70
