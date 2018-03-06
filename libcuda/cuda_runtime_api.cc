@@ -2,16 +2,16 @@
 // Changes Copyright 2009,  Tor M. Aamodt, Ali Bakhoda and George L. Yuan
 // University of British Columbia
 
-/* 
+/*
  * cuda_runtime_api.cc
  *
- * Copyright © 2009 by Tor M. Aamodt, Wilson W. L. Fung, Ali Bakhoda, 
- * George L. Yuan and the University of British Columbia, Vancouver, 
+ * Copyright © 2009 by Tor M. Aamodt, Wilson W. L. Fung, Ali Bakhoda,
+ * George L. Yuan and the University of British Columbia, Vancouver,
  * BC V6T 1Z4, All Rights Reserved.
- * 
+ *
  * THIS IS A LEGAL DOCUMENT BY DOWNLOADING GPGPU-SIM, YOU ARE AGREEING TO THESE
  * TERMS AND CONDITIONS.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -23,80 +23,80 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * NOTE: The files libcuda/cuda_runtime_api.c and src/cuda-sim/cuda-math.h
  * are derived from the CUDA Toolset available from http://www.nvidia.com/cuda
- * (property of NVIDIA).  The files benchmarks/BlackScholes/ and 
- * benchmarks/template/ are derived from the CUDA SDK available from 
- * http://www.nvidia.com/cuda (also property of NVIDIA).  The files from 
- * src/intersim/ are derived from Booksim (a simulator provided with the 
- * textbook "Principles and Practices of Interconnection Networks" available 
- * from http://cva.stanford.edu/books/ppin/). As such, those files are bound by 
- * the corresponding legal terms and conditions set forth separately (original 
- * copyright notices are left in files from these sources and where we have 
- * modified a file our copyright notice appears before the original copyright 
- * notice).  
- * 
- * Using this version of GPGPU-Sim requires a complete installation of CUDA 
- * which is distributed seperately by NVIDIA under separate terms and 
+ * (property of NVIDIA).  The files benchmarks/BlackScholes/ and
+ * benchmarks/template/ are derived from the CUDA SDK available from
+ * http://www.nvidia.com/cuda (also property of NVIDIA).  The files from
+ * src/intersim/ are derived from Booksim (a simulator provided with the
+ * textbook "Principles and Practices of Interconnection Networks" available
+ * from http://cva.stanford.edu/books/ppin/). As such, those files are bound by
+ * the corresponding legal terms and conditions set forth separately (original
+ * copyright notices are left in files from these sources and where we have
+ * modified a file our copyright notice appears before the original copyright
+ * notice).
+ *
+ * Using this version of GPGPU-Sim requires a complete installation of CUDA
+ * which is distributed seperately by NVIDIA under separate terms and
  * conditions.  To use this version of GPGPU-Sim with OpenCL requires a
  * recent version of NVIDIA's drivers which support OpenCL.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  * this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of the University of British Columbia nor the names of
  * its contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
- * 
- * 4. This version of GPGPU-SIM is distributed freely for non-commercial use only.  
- *  
+ *
+ * 4. This version of GPGPU-SIM is distributed freely for non-commercial use only.
+ *
  * 5. No nonprofit user may place any restrictions on the use of this software,
  * including as modified by the user, by any other authorized user.
- * 
- * 6. GPGPU-SIM was developed primarily by Tor M. Aamodt, Wilson W. L. Fung, 
- * Ali Bakhoda, George L. Yuan, at the University of British Columbia, 
+ *
+ * 6. GPGPU-SIM was developed primarily by Tor M. Aamodt, Wilson W. L. Fung,
+ * Ali Bakhoda, George L. Yuan, at the University of British Columbia,
  * Vancouver, BC V6T 1Z4
  */
 
 /*
  * Copyright 1993-2007 NVIDIA Corporation.  All rights reserved.
  *
- * NOTICE TO USER:   
+ * NOTICE TO USER:
  *
- * This source code is subject to NVIDIA ownership rights under U.S. and 
- * international Copyright laws.  Users and possessors of this source code 
- * are hereby granted a nonexclusive, royalty-free license to use this code 
+ * This source code is subject to NVIDIA ownership rights under U.S. and
+ * international Copyright laws.  Users and possessors of this source code
+ * are hereby granted a nonexclusive, royalty-free license to use this code
  * in individual and commercial software.
  *
- * NVIDIA MAKES NO REPRESENTATION ABOUT THE SUITABILITY OF THIS SOURCE 
- * CODE FOR ANY PURPOSE.  IT IS PROVIDED "AS IS" WITHOUT EXPRESS OR 
- * IMPLIED WARRANTY OF ANY KIND.  NVIDIA DISCLAIMS ALL WARRANTIES WITH 
- * REGARD TO THIS SOURCE CODE, INCLUDING ALL IMPLIED WARRANTIES OF 
+ * NVIDIA MAKES NO REPRESENTATION ABOUT THE SUITABILITY OF THIS SOURCE
+ * CODE FOR ANY PURPOSE.  IT IS PROVIDED "AS IS" WITHOUT EXPRESS OR
+ * IMPLIED WARRANTY OF ANY KIND.  NVIDIA DISCLAIMS ALL WARRANTIES WITH
+ * REGARD TO THIS SOURCE CODE, INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE.
- * IN NO EVENT SHALL NVIDIA BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL, 
- * OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS 
- * OF USE, DATA OR PROFITS,  WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE 
- * OR OTHER TORTIOUS ACTION,  ARISING OUT OF OR IN CONNECTION WITH THE USE 
- * OR PERFORMANCE OF THIS SOURCE CODE.  
+ * IN NO EVENT SHALL NVIDIA BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL,
+ * OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
+ * OF USE, DATA OR PROFITS,  WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+ * OR OTHER TORTIOUS ACTION,  ARISING OUT OF OR IN CONNECTION WITH THE USE
+ * OR PERFORMANCE OF THIS SOURCE CODE.
  *
- * U.S. Government End Users.   This source code is a "commercial item" as 
- * that term is defined at  48 C.F.R. 2.101 (OCT 1995), consisting  of 
- * "commercial computer  software"  and "commercial computer software 
- * documentation" as such terms are  used in 48 C.F.R. 12.212 (SEPT 1995) 
- * and is provided to the U.S. Government only as a commercial end item.  
- * Consistent with 48 C.F.R.12.212 and 48 C.F.R. 227.7202-1 through 
- * 227.7202-4 (JUNE 1995), all U.S. Government End Users acquire the 
- * source code with only those rights set forth herein. 
+ * U.S. Government End Users.   This source code is a "commercial item" as
+ * that term is defined at  48 C.F.R. 2.101 (OCT 1995), consisting  of
+ * "commercial computer  software"  and "commercial computer software
+ * documentation" as such terms are  used in 48 C.F.R. 12.212 (SEPT 1995)
+ * and is provided to the U.S. Government only as a commercial end item.
+ * Consistent with 48 C.F.R.12.212 and 48 C.F.R. 227.7202-1 through
+ * 227.7202-4 (JUNE 1995), all U.S. Government End Users acquire the
+ * source code with only those rights set forth herein.
  *
- * Any use of this source code in individual and commercial software must 
+ * Any use of this source code in individual and commercial software must
  * include, in the user documentation and internal comments to the code,
  * the above Disclaimer and U.S. Government End Users Notice.
  */
@@ -151,7 +151,7 @@ extern void exit_simulation();
 static int load_static_globals( symbol_table *symtab, unsigned min_gaddr, unsigned max_gaddr, gpgpu_t *gpu );
 static int load_constants( symbol_table *symtab, addr_t min_gaddr, gpgpu_t *gpu );
 
-static kernel_info_t *gpgpu_cuda_ptx_sim_init_grid( const char *kernel_key, 
+static kernel_info_t *gpgpu_cuda_ptx_sim_init_grid( const char *kernel_key,
 		gpgpu_ptx_sim_arg_list_t args,
 		struct dim3 gridDim,
 		struct dim3 blockDim,
@@ -456,7 +456,7 @@ cudaError_t cudaPeekAtLastError(void)
 	return g_last_cudaError;
 }
 
-__host__ cudaError_t CUDARTAPI cudaMalloc(void **devPtr, size_t size) 
+__host__ cudaError_t CUDARTAPI cudaMalloc(void **devPtr, size_t size)
 {
 	CUctx_st* context = GPGPUSim_Context();
 	*devPtr = context->get_device()->get_gpgpu()->gpu_malloc(size);
@@ -549,6 +549,7 @@ __host__ cudaError_t CUDARTAPI cudaMemcpy(void *dst, const void *src, size_t cou
 		g_stream_manager->push( stream_operation((size_t)src,dst,count,0) );
 	else if( kind == cudaMemcpyDeviceToDevice )
 		g_stream_manager->push( stream_operation((size_t)src,(size_t)dst,count,0) );
+	/*
 	else if ( kind == cudaMemcpyDefault ) {
 		if ((size_t)src >= GLOBAL_HEAP_START) {
 			if ((size_t)dst >= GLOBAL_HEAP_START)
@@ -564,7 +565,7 @@ __host__ cudaError_t CUDARTAPI cudaMemcpy(void *dst, const void *src, size_t cou
 				abort();
 			}
 		}
-	}
+	}*/
 	else {
 		printf("GPGPU-Sim PTX: cudaMemcpy - ERROR : unsupported cudaMemcpyKind\n");
 		abort();
@@ -573,7 +574,7 @@ __host__ cudaError_t CUDARTAPI cudaMemcpy(void *dst, const void *src, size_t cou
 }
 
 __host__ cudaError_t CUDARTAPI cudaMemcpyToArray(struct cudaArray *dst, size_t wOffset, size_t hOffset, const void *src, size_t count, enum cudaMemcpyKind kind)
-{ 
+{
 	CUctx_st *context = GPGPUSim_Context();
 	gpgpu_t *gpu = context->get_device()->get_gpgpu();
 	size_t size = count;
@@ -1173,11 +1174,11 @@ typedef struct CUuuid_st {                                /**< CUDA definition o
 
 __host__ cudaError_t CUDARTAPI cudaGetExportTable(const void **ppExportTable, const cudaUUID_t *pExportTableId)
 {
-	printf("cudaGetExportTable: UUID = "); 
+	printf("cudaGetExportTable: UUID = ");
 	for (int s = 0; s < 16; s++) {
-		printf("%#2x ", (unsigned char) (pExportTableId->bytes[s])); 
+		printf("%#2x ", (unsigned char) (pExportTableId->bytes[s]));
 	}
-	printf("\n"); 
+	printf("\n");
 	return g_last_cudaError = cudaSuccess;
 }
 
@@ -1310,7 +1311,7 @@ void setCuobjdumpsassfilename(const char* filename){
 extern int cuobjdump_parse();
 extern FILE *cuobjdump_in;
 
-//! Return the executable file of the process containing the PTX/SASS code 
+//! Return the executable file of the process containing the PTX/SASS code
 //!
 //! This Function returns the executable file ran by the process.  This
 //! executable is supposed to contain the PTX/SASS code.  It provides workaround
@@ -1318,8 +1319,8 @@ extern FILE *cuobjdump_in;
 //! GPGPU-Sim process before calling cuobjdump to extract PTX/SASS.  This is
 //! needed because valgrind uses x86 emulation to detect memory leak.  Other
 //! processes (e.g. cuobjdump) reading /proc/<pid>/exe will see the emulator
-//! executable instead of the application binary.  
-//! 
+//! executable instead of the application binary.
+//!
 std::string get_app_binary(){
    char self_exe_path[1025];
 #ifdef __APPLE__
@@ -1332,13 +1333,13 @@ std::string get_app_binary(){
    std::stringstream exec_link;
    exec_link << "/proc/self/exe";
 
-   ssize_t path_length = readlink(exec_link.str().c_str(), self_exe_path, 1024); 
-   assert(path_length != -1); 
-   self_exe_path[path_length] = '\0'; 
+   ssize_t path_length = readlink(exec_link.str().c_str(), self_exe_path, 1024);
+   assert(path_length != -1);
+   self_exe_path[path_length] = '\0';
 #endif
 
-   printf("self exe links to: %s\n", self_exe_path); 
-   return self_exe_path; 
+   printf("self exe links to: %s\n", self_exe_path);
+   return self_exe_path;
 }
 
 //! Call cuobjdump to extract everything (-elf -sass -ptx)
@@ -1353,7 +1354,7 @@ void extract_code_using_cuobjdump(){
 	CUctx_st *context = GPGPUSim_Context();
 	char command[1000];
 
-   std::string app_binary = get_app_binary(); 
+   std::string app_binary = get_app_binary();
 
 	char fname[1024];
 	snprintf(fname,1024,"_cuobjdump_complete_output_XXXXXX");
@@ -1364,25 +1365,25 @@ void extract_code_using_cuobjdump(){
 	printf("Running md5sum using \"%s\"\n", command);
 	system(command);
 	// Running cuobjdump using dynamic link to current process
-	// Needs the option '-all' to extract PTX from CDP-enabled binary 
+	// Needs the option '-all' to extract PTX from CDP-enabled binary
 	extern bool g_cdp_enabled;
 	if(!g_cdp_enabled)
 	    snprintf(command,1000,"$CUDA_INSTALL_PATH/bin/cuobjdump -ptx -elf -sass %s > %s", app_binary.c_str(), fname);
 	else
 	    snprintf(command,1000,"$CUDA_INSTALL_PATH/bin/cuobjdump -ptx -elf -sass -all %s > %s", app_binary.c_str(), fname);
-	bool parse_output = true; 
+	bool parse_output = true;
 	int result = system(command);
 	if(result) {
-		if (context->get_device()->get_gpgpu()->get_config().experimental_lib_support() && (result == 65280)) {  
+		if (context->get_device()->get_gpgpu()->get_config().experimental_lib_support() && (result == 65280)) {
 			// Some CUDA application may exclusively use kernels provided by CUDA
 			// libraries (e.g. CUBLAS).  Skipping cuobjdump extraction from the
-			// executable for this case. 
+			// executable for this case.
 			// 65280 is the return code from cuobjdump denoting the specific error (tested on CUDA 4.0/4.1/4.2)
-			printf("WARNING: Failed to execute: %s\n", command); 
-			printf("         Executable binary does not contain any GPU kernel.\n"); 
-			parse_output = false; 
+			printf("WARNING: Failed to execute: %s\n", command);
+			printf("         Executable binary does not contain any GPU kernel.\n");
+			parse_output = false;
 		} else {
-			printf("ERROR: Failed to execute: %s\n", command); 
+			printf("ERROR: Failed to execute: %s\n", command);
 			exit(1);
 		}
 	}
@@ -1395,7 +1396,7 @@ void extract_code_using_cuobjdump(){
 		fclose(cuobjdump_in);
 		printf("Done parsing!!!\n");
 	} else {
-		printf("Parsing skipped for %s\n", fname); 
+		printf("Parsing skipped for %s\n", fname);
 	}
 
 	if (context->get_device()->get_gpgpu()->get_config().experimental_lib_support()){
@@ -1719,7 +1720,7 @@ void cuobjdumpParseBinary(unsigned int handle){
 	cuobjdumpPTXSection* ptx = findPTXSection(fname);
 	symbol_table *symtab;
 	char *ptxcode;
-	const char *override_ptx_name = getenv("PTX_SIM_KERNELFILE"); 
+	const char *override_ptx_name = getenv("PTX_SIM_KERNELFILE");
 	if (override_ptx_name == NULL or getenv("PTX_SIM_USE_PTX_FILE") == NULL) {
 		ptxcode = readfile(ptx->getPTXfilename());
 	} else {
@@ -1760,31 +1761,31 @@ void** CUDARTAPI __cudaRegisterFatBinary( void *fatCubin )
 	CUctx_st *context = GPGPUSim_Context();
 	static unsigned next_fat_bin_handle = 1;
 	if(context->get_device()->get_gpgpu()->get_config().use_cuobjdump()) {
-		// The following workaround has only been verified on 64-bit systems. 
-		if (sizeof(void*) == 4) 
-			printf("GPGPU-Sim PTX: FatBin file name extraction has not been tested on 32-bit system.\n"); 
+		// The following workaround has only been verified on 64-bit systems.
+		if (sizeof(void*) == 4)
+			printf("GPGPU-Sim PTX: FatBin file name extraction has not been tested on 32-bit system.\n");
 
 		// FatBin handle from the .fatbin.c file (one of the intermediate files generated by NVCC)
-		typedef struct {int m; int v; const unsigned long long* d; char* f;} __fatDeviceText __attribute__ ((aligned (8))); 
+		typedef struct {int m; int v; const unsigned long long* d; char* f;} __fatDeviceText __attribute__ ((aligned (8)));
 		__fatDeviceText * fatDeviceText = (__fatDeviceText *) fatCubin;
 
-		// Extract the source code file name that generate the given FatBin. 
+		// Extract the source code file name that generate the given FatBin.
 		// - Obtains the pointer to the actual fatbin structure from the FatBin handle (fatCubin).
 		// - An integer inside the fatbin structure contains the relative offset to the source code file name.
-		// - This offset differs among different CUDA and GCC versions. 
+		// - This offset differs among different CUDA and GCC versions.
 		#if (CUDART_VERSION <= 6000)
-		char * pfatbin = (char*) fatDeviceText->d; 
-		int offset = *((int*)(pfatbin+48)); 
-		char * filename = (pfatbin+16+offset); 
+		char * pfatbin = (char*) fatDeviceText->d;
+		int offset = *((int*)(pfatbin+48));
+		char * filename = (pfatbin+16+offset);
 		#else
 		char * filename = "default";
 		#endif
 		// The extracted file name is associated with a fat_cubin_handle passed
 		// into cudaLaunch().  Inside cudaLaunch(), the associated file name is
 		// used to find the PTX/SASS section from cuobjdump, which contains the
-		// PTX/SASS code for the launched kernel function.  
+		// PTX/SASS code for the launched kernel function.
 		// This allows us to work around the fact that cuobjdump only outputs the
-		// file name associated with each section. 
+		// file name associated with each section.
 		unsigned long long fat_cubin_handle = next_fat_bin_handle;
 		next_fat_bin_handle++;
 		printf("GPGPU-Sim PTX: __cudaRegisterFatBinary, fat_cubin_handle = %llu, filename=%s\n", fat_cubin_handle, filename);
@@ -1797,7 +1798,7 @@ void** CUDARTAPI __cudaRegisterFatBinary( void *fatCubin )
 		cuobjdumpRegisterFatBinary(fat_cubin_handle, filename);
 
 		return (void**)fat_cubin_handle;
-	} 
+	}
 	#if (CUDART_VERSION < 8000)
 	else {
 		static unsigned source_num=1;
@@ -1984,7 +1985,7 @@ typedef struct glbmap_entry glbmap_entry_t;
 
 glbmap_entry_t* g_glbmap = NULL;
 
-cudaError_t cudaGLMapBufferObject(void** devPtr, GLuint bufferObj) 
+cudaError_t cudaGLMapBufferObject(void** devPtr, GLuint bufferObj)
 {
 #ifdef OPENGL_SUPPORT
 	GLint buffer_size=0;
@@ -2061,7 +2062,7 @@ cudaError_t cudaGLUnmapBufferObject(GLuint bufferObj)
 #endif
 }
 
-cudaError_t cudaGLUnregisterBufferObject(GLuint bufferObj) 
+cudaError_t cudaGLUnregisterBufferObject(GLuint bufferObj)
 {
 	printf("GPGPU-Sim PTX: Execution warning: ignoring call to \"%s\"\n", __my_func__ );
 	return g_last_cudaError = cudaSuccess;
@@ -2174,7 +2175,7 @@ void CUDARTAPI __cudaMutexOperation(int lock)
 	cuda_not_implemented(__my_func__,__LINE__);
 }
 
-void  CUDARTAPI __cudaTextureFetch(const void *tex, void *index, int integer, void *val) 
+void  CUDARTAPI __cudaTextureFetch(const void *tex, void *index, int integer, void *val)
 {
 	cuda_not_implemented(__my_func__,__LINE__);
 }
@@ -2188,7 +2189,7 @@ void CUDARTAPI __cudaMutexOperation(int lock)
 	cuda_not_implemented(__my_func__,__LINE__);
 }
 
-void  CUDARTAPI __cudaTextureFetch(const void *tex, void *index, int integer, void *val) 
+void  CUDARTAPI __cudaTextureFetch(const void *tex, void *index, int integer, void *val)
 {
 	cuda_not_implemented(__my_func__,__LINE__);
 }
@@ -2213,7 +2214,7 @@ extern FILE *ptxinfo_in;
 
 /// static functions
 
-static int load_static_globals( symbol_table *symtab, unsigned min_gaddr, unsigned max_gaddr, gpgpu_t *gpu ) 
+static int load_static_globals( symbol_table *symtab, unsigned min_gaddr, unsigned max_gaddr, gpgpu_t *gpu )
 {
 	printf( "GPGPU-Sim PTX: loading globals with explicit initializers... \n" );
 	fflush(stdout);
@@ -2249,7 +2250,7 @@ static int load_static_globals( symbol_table *symtab, unsigned min_gaddr, unsign
 	return ng_bytes;
 }
 
-static int load_constants( symbol_table *symtab, addr_t min_gaddr, gpgpu_t *gpu ) 
+static int load_constants( symbol_table *symtab, addr_t min_gaddr, gpgpu_t *gpu )
 {
 	printf( "GPGPU-Sim PTX: loading constants with explicit initializers... " );
 	fflush(stdout);
@@ -2292,7 +2293,7 @@ static int load_constants( symbol_table *symtab, addr_t min_gaddr, gpgpu_t *gpu 
 	return nc_bytes;
 }
 
-kernel_info_t *gpgpu_cuda_ptx_sim_init_grid( const char *hostFun, 
+kernel_info_t *gpgpu_cuda_ptx_sim_init_grid( const char *hostFun,
 		gpgpu_ptx_sim_arg_list_t args,
 		struct dim3 gridDim,
 		struct dim3 blockDim,
