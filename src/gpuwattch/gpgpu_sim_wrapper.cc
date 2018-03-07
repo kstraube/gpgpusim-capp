@@ -238,17 +238,17 @@ void gpgpu_sim_wrapper::reset_counters(){
 
 void gpgpu_sim_wrapper::set_inst_power(bool clk_gated_lanes, double tot_cycles, double busy_cycles, double tot_inst, double int_inst, double fp_inst, double load_inst, double store_inst, double committed_inst)
 {
-	p->sys.core[0].gpgpu_clock_gated_lanes = clk_gated_lanes;
-	p->sys.core[0].total_cycles = tot_cycles;
-	p->sys.core[0].busy_cycles = busy_cycles;
-	p->sys.core[0].total_instructions  = tot_inst * p->sys.scaling_coefficients[TOT_INST];
-	p->sys.core[0].int_instructions    = int_inst * p->sys.scaling_coefficients[FP_INT];
-	p->sys.core[0].fp_instructions     = fp_inst  * p->sys.scaling_coefficients[FP_INT];
-	p->sys.core[0].load_instructions  = load_inst;
-	p->sys.core[0].store_instructions = store_inst;
-	p->sys.core[0].committed_instructions = committed_inst;
-	sample_perf_counters[FP_INT]=int_inst+fp_inst;
-	sample_perf_counters[TOT_INST]=tot_inst;
+	p->sys.core[0].gpgpu_clock_gated_lanes += clk_gated_lanes;
+	p->sys.core[0].total_cycles += tot_cycles;
+	p->sys.core[0].busy_cycles += busy_cycles;
+	p->sys.core[0].total_instructions  += tot_inst * p->sys.scaling_coefficients[TOT_INST];
+	p->sys.core[0].int_instructions    += int_inst * p->sys.scaling_coefficients[FP_INT];
+	p->sys.core[0].fp_instructions    + = fp_inst  * p->sys.scaling_coefficients[FP_INT];
+	p->sys.core[0].load_instructions  += load_inst;
+	p->sys.core[0].store_instructions += store_inst;
+	p->sys.core[0].committed_instructions += committed_inst;
+	sample_perf_counters[FP_INT]+=int_inst+fp_inst;
+	sample_perf_counters[TOT_INST]+=tot_inst;
 }
 
 void gpgpu_sim_wrapper::set_regfile_power(double reads, double writes,double ops)
@@ -609,6 +609,17 @@ void gpgpu_sim_wrapper::update_components_power()
 void gpgpu_sim_wrapper::set_clock_rate(double curr_freq)
 {
   proc->set_clock_rate(curr_freq);
+  p->sys.core[0].gpgpu_clock_gated_lanes = 0;
+  p->sys.core[0].total_cycles = 0;
+  p->sys.core[0].busy_cycles = 0;
+  p->sys.core[0].total_instructions  = 0;
+  p->sys.core[0].int_instructions    = 0;
+  p->sys.core[0].fp_instructions     = 0;
+  p->sys.core[0].load_instructions  = 0;
+  p->sys.core[0].store_instructions = 0;
+  p->sys.core[0].committed_instructions = 0;
+  sample_perf_counters[FP_INT] = 0;
+  sample_perf_counters[TOT_INST] = 0
 }
 
 std::vector<double> gpgpu_sim_wrapper::compute(double curr_freq)
