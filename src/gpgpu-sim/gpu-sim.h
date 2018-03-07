@@ -62,9 +62,9 @@
 #define CREATELOG 111
 #define SAMPLELOG 222
 #define DUMPLOG 333
-#define CAPP_ENABLE 1 //0 to switch to fixed frequency
-#define FIXED_FREQ_EN 0 //enable for fixed freq override of config
-#define FIXED_FREQ_VAL 500
+#define CAPP_ENABLE 0 //0 to switch to fixed frequency
+#define FIXED_FREQ_EN 1//enable for fixed freq override of config
+#define FIXED_FREQ_VAL 1000
 #define TDP_SPEC 59.0 //W
 #define IPC_UP_THRESHOLD_CAPP 50
 #define IPC_DOWN_THRESHOLD_CAPP 30
