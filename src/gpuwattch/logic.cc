@@ -610,7 +610,7 @@ FunctionalUnit::FunctionalUnit(ParseXML *XML_interface, int ithCore_, InputParam
 void FunctionalUnit::computeEnergy(bool is_tdp)
 {
 
-  executionTime=XML->sys.total_cycles/(coredynp.clockRate*1e6);//(XML->sys.target_core_clockrate*1e6);//Syed
+  executionTime=XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);//Syed
 	double pppm_t[4]    = {1,1,1,1};
 	double FU_duty_cycle;
 	if (is_tdp)

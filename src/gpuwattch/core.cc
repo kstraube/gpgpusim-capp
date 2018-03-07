@@ -2600,7 +2600,7 @@ void BranchPredictor::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 
 void InstFetchU::computeEnergy(bool is_tdp)
 {
-  executionTime=XML->sys.total_cycles/(coredynp.clockRate*1e6);//(XML->sys.target_core_clockrate*1e6);//Syed
+  executionTime=XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);//Syed
   //cout <<"IFU: execution time: "<<XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6)<<endl;
   //cout <<"IFU: total cycles"<<XML->sys.total_cycles<<endl;
 	if (!exist) return;
@@ -2703,7 +2703,6 @@ void InstFetchU::computeEnergy(bool is_tdp)
     		//icache.caches->stats_t.readAc.miss*icache.caches->local_result.tag_array2->power.readOp.dynamic+
     		icache.caches->stats_t.readAc.miss*icache.caches->local_result.power.readOp.dynamic+ //assume tag data accessed in parallel
     		icache.caches->stats_t.readAc.miss*icache.caches->local_result.power.writeOp.dynamic); //read miss in Icache cause a write to Icache
-    // cout << "(I$ read acc - read miss)*"
     icache.power_t.readOp.dynamic	+=  icache.missb->stats_t.readAc.access*icache.missb->local_result.power.searchOp.dynamic +
             icache.missb->stats_t.writeAc.access*icache.missb->local_result.power.writeOp.dynamic;//each access to missb involves a CAM and a write
     icache.power_t.readOp.dynamic	+=  icache.ifb->stats_t.readAc.access*icache.ifb->local_result.power.searchOp.dynamic +
@@ -3608,7 +3607,7 @@ void LoadStoreU::computeEnergy(bool is_tdp)
 {
 	if (!exist) return;
 
-	executionTime=XML->sys.total_cycles/(coredynp.clockRate*1e6);//(XML->sys.target_core_clockrate*1e6);//Syed
+	executionTime=XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);//Syed
 
 	//RF crossbar power (Syed)
 	xbar_shared->compute_power();
@@ -4352,7 +4351,7 @@ void RegFU::computeEnergy(bool is_tdp)
  */
 	if (!exist) return;
 
-  executionTime=XML->sys.total_cycles/(coredynp.clockRate*1e6);//(XML->sys.target_core_clockrate*1e6);//Syed
+  executionTime=XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);//Syed
  //RF crossbar power (Syed Gilani)
  xbar_rfu->compute_power();
 
@@ -4580,7 +4579,7 @@ void EXECU::computeEnergy(bool is_tdp)
 	//Syed
 	double pppm_t[4]    = {1,1,1,1};
 	double pppm_freqScaling[4]    = {rf_fu_clockRate/clockRate,1,1,1};
-  executionTime=XML->sys.total_cycles/(coredynp.clockRate*1e6);//(XML->sys.target_core_clockrate*1e6);//Syed
+  executionTime=XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);//Syed
 
 
 //	rfu->power.reset();
@@ -4728,8 +4727,8 @@ void EXECU::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 
 void Core::set_clock_rate(double new_clock_rate)
 {
-  coredynp.clockRate = new_clock_rate * 1e6;
-  clockRate = new_clock_rate;
+  // coredynp.clockRate = new_clock_rate * 1e6;
+  // clockRate = new_clock_rate;
 }
 
 
@@ -4750,8 +4749,8 @@ void Core::compute(double curr_freq)
     mmu->rt_power.reset();
     exu->rt_power.reset();
 
-    coredynp.clockRate = curr_freq * 1e6;
-    clockRate = curr_freq;
+    // coredynp.clockRate = curr_freq * 1e6;
+    // clockRate = curr_freq;
 
 		ifu->computeEnergy(false);
 		lsu->computeEnergy(false);

@@ -454,8 +454,7 @@ std::vector<double> Processor::compute(double curr_freq)
   core.rt_power.reset();
   for (i = 0;i < numCore; i++)
   {
-      cores[i]->executionTime = XML->sys.total_cycles /(curr_freq*(1e6));
-      //(XML->sys.core[i].clock_rate*1e6);
+      cores[i]->executionTime = XML->sys.total_cycles /(XML->sys.core[i].clock_rate*1e6);
       cores[i]->rt_power.reset();
 		  cores[i]->compute(curr_freq);
 		  //cores[i]->computeEnergy(false);
