@@ -1449,9 +1449,6 @@ void gpgpu_sim::cycle()
  	         } else {
 				 m_cluster[i]->no_tick();
 			 }
- 	         // Update core icnt/cache stats for GPUWattch
- 	         m_cluster[i]->get_icnt_stats(m_power_stats->pwr_mem_stat->n_simt_to_mem[CURRENT_STAT_IDX][i], m_power_stats->pwr_mem_stat->n_mem_to_simt[CURRENT_STAT_IDX][i]);
- 	         m_cluster[i]->get_cache_stats(m_power_stats->pwr_mem_stat->core_cache_stats[CURRENT_STAT_IDX]);
  		 }
        }
    }
@@ -1459,6 +1456,11 @@ void gpgpu_sim::cycle()
    if (clock_mask & GPU) {
       // L1 cache + shader core pipeline stages
       m_power_stats->pwr_mem_stat->core_cache_stats[CURRENT_STAT_IDX].clear();
+	  for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
+		  // Update core icnt/cache stats for GPUWattch
+		  m_cluster[i]->get_icnt_stats(m_power_stats->pwr_mem_stat->n_simt_to_mem[CURRENT_STAT_IDX][i], m_power_stats->pwr_mem_stat->n_mem_to_simt[CURRENT_STAT_IDX][i]);
+		  m_cluster[i]->get_cache_stats(m_power_stats->pwr_mem_stat->core_cache_stats[CURRENT_STAT_IDX]);
+	  }
 
       float temp=0;
       for (unsigned i=0;i<m_shader_config->num_shader();i++){
