@@ -781,7 +781,7 @@ void gpgpu_sim::init()
 #endif
 
 	for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
-		m_cluster[i]->set_clock_period(m_config.core_period);
+		m_cluster[i]->set_clock_period(1e-6/700);//m_config.core_period);
 	}
 }
 
@@ -1441,33 +1441,51 @@ void gpgpu_sim::cycle()
    }
 
    if (clock_mask & CORE) {
+           m_power_stats->pwr_mem_stat->core_cache_stats[CURRENT_STAT_IDX].clear();
 	   for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
  		 if (m_cluster[i]->is_ticking()) {
  	         if (m_cluster[i]->get_not_completed() || get_more_cta_left() ) {
  	               m_cluster[i]->core_cycle();
- 	               *active_sms+=m_cluster[i]->get_n_active_sms();
+ 	               *active_sms+=m_cluster[i]->get_n_active_sms()*m_cluster[i]->get_clock_period()/m_config.core_period;
  	         } else {
 				 m_cluster[i]->no_tick();
 			 }
+                   
+
  		 }
-       }
+
+           m_cluster[i]->get_icnt_stats(m_power_stats->pwr_mem_stat->n_simt_to_mem[CURRENT_STAT_IDX][i], m_power_stats->pwr_mem_stat->n_mem_to_simt[CURRENT_STAT_IDX][i]);
+		  m_cluster[i]->get_cache_stats(m_power_stats->pwr_mem_stat->core_cache_stats[CURRENT_STAT_IDX]);
+           }
+           cout << "Active sms" << *active_sms << endl;
+           float temp=0;
+           for (unsigned i=0;i<m_shader_config->num_shader();i++){
+                 temp+=m_shader_stats->m_pipeline_duty_cycle[i];
+           }
+           temp=temp/m_shader_config->num_shader();
+           *average_pipeline_duty_cycle=((*average_pipeline_duty_cycle)+temp);
+           
+         issue_block2core();
+           
+           
    }
 
    if (clock_mask & GPU) {
       // L1 cache + shader core pipeline stages
-      m_power_stats->pwr_mem_stat->core_cache_stats[CURRENT_STAT_IDX].clear();
-	  for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
+      
+	  /*for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
 		  // Update core icnt/cache stats for GPUWattch
 		  m_cluster[i]->get_icnt_stats(m_power_stats->pwr_mem_stat->n_simt_to_mem[CURRENT_STAT_IDX][i], m_power_stats->pwr_mem_stat->n_mem_to_simt[CURRENT_STAT_IDX][i]);
 		  m_cluster[i]->get_cache_stats(m_power_stats->pwr_mem_stat->core_cache_stats[CURRENT_STAT_IDX]);
-	  }
+	  }*/
+      
 
-      float temp=0;
+      /*float temp=0;
       for (unsigned i=0;i<m_shader_config->num_shader();i++){
         temp+=m_shader_stats->m_pipeline_duty_cycle[i];
       }
       temp=temp/m_shader_config->num_shader();
-      *average_pipeline_duty_cycle=((*average_pipeline_duty_cycle)+temp);
+      *average_pipeline_duty_cycle=((*average_pipeline_duty_cycle)+temp);*/
         //cout<<"Average pipeline duty cycle: "<<*average_pipeline_duty_cycle<<endl;
 
 
@@ -1485,9 +1503,9 @@ void gpgpu_sim::cycle()
       }
 #endif
 
-      issue_block2core();
+      //issue_block2core();
 
-      // Depending on configuration, flush the caches once all of threads are completed.
+       // Depending on configuration, flush the caches once all of threads are completed.
       int all_threads_complete = 1;
       if (m_config.gpgpu_flush_l1_cache) {
          for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
@@ -1518,7 +1536,7 @@ void gpgpu_sim::cycle()
                   printf("Dirty lines flushed from L2 %d is %d\n", i, dlc  );
                }
             }
-         }
+         } 
       }
 
       if (!(gpu_sim_cycle % 100)) {

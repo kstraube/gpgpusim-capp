@@ -1941,6 +1941,10 @@ public:
     void set_clock_period(double period) {
         m_clock_period = period;
     }
+    
+    double get_clock_period() {
+        return m_clock_period;
+    }
 
     bool need_to_tick(double smallest) {
         assert(m_ticking == false);

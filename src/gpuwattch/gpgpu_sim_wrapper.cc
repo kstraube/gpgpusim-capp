@@ -552,6 +552,7 @@ void gpgpu_sim_wrapper::update_components_power()
 			    +proc->cores[0]->ifu->ID_inst->rt_power.readOp.dynamic)/(proc->cores[0]->executionTime);
 
 	sample_cmp_pwr[ICP]=proc->cores[0]->ifu->icache.rt_power.readOp.dynamic/(proc->cores[0]->executionTime);
+   cout <<"Exec Time: " << (proc->cores[0]->executionTime) << endl;
 
 	sample_cmp_pwr[DCP]=proc->cores[0]->lsu->dcache.rt_power.readOp.dynamic/(proc->cores[0]->executionTime);
 
@@ -576,6 +577,9 @@ void gpgpu_sim_wrapper::update_components_power()
 	sample_cmp_pwr[L2CP]=(proc->XML->sys.number_of_L2s>0)? proc->l2array[0]->rt_power.readOp.dynamic/(proc->cores[0]->executionTime):0;
 
 	sample_cmp_pwr[MCP]=(proc->mc->rt_power.readOp.dynamic-proc->mc->dram->rt_power.readOp.dynamic)/(proc->cores[0]->executionTime);
+   cout << "MCP SIMPLE STAT PWR: " << proc->mc->rt_power.readOp.dynamic/(proc->cores[0]->executionTime) << endl;
+   cout << "MCP STAT PWR: " << sample_cmp_pwr[MCP] << endl;
+   cout << "MCP DRAM STAT PWR: " << proc->mc->dram->rt_power.readOp.dynamic/(proc->cores[0]->executionTime) << endl;
 
 	sample_cmp_pwr[NOCP]=proc->nocs[0]->rt_power.readOp.dynamic/(proc->cores[0]->executionTime);
 
@@ -601,6 +605,8 @@ void gpgpu_sim_wrapper::update_components_power()
 		sum_pwr_cmp+=sample_cmp_pwr[i];
 	}
 	bool check=false;
+   cout << "sum power: " << sum_pwr_cmp << endl;
+   cout << "proc power: " << proc_power << endl;
 	check=sanity_check(sum_pwr_cmp,proc_power);
 	assert("Total Power does not equal the sum of the components\n" && (check));
 
@@ -609,6 +615,8 @@ void gpgpu_sim_wrapper::update_components_power()
 void gpgpu_sim_wrapper::compute()
 {
 	proc->compute();
+   cout << "MCP SIMPLE Compute STAT PWR: " << proc->mc->rt_power.readOp.dynamic/(proc->cores[0]->executionTime) << endl;
+   cout << "MCP SIMPLE_mc Compute STAT PWR: " << proc->mc->rt_power.readOp.dynamic/proc->mc->mcp.executionTime <<endl;
 }
 void gpgpu_sim_wrapper::print_power_kernel_stats(double gpu_sim_cycle, double gpu_tot_sim_cycle, double init_value, const std::string & kernel_info_string, bool print_trace)
 {
