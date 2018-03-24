@@ -2600,7 +2600,7 @@ void BranchPredictor::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 
 void InstFetchU::computeEnergy(bool is_tdp)
 {
-  executionTime=XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);//Syed
+  executionTime=XML->sys.total_cycles/(XML->sys.core[0].clock_rate*1e6); //(XML->sys.target_core_clockrate*1e6);//Syed
   //cout <<"IFU: execution time: "<<XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6)<<endl;
   //cout <<"IFU: total cycles"<<XML->sys.total_cycles<<endl;
 	if (!exist) return;
@@ -3607,7 +3607,7 @@ void LoadStoreU::computeEnergy(bool is_tdp)
 {
 	if (!exist) return;
 
-	executionTime=XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);//Syed
+	executionTime=XML->sys.total_cycles/(XML->sys.core[0].clock_rate*1e6); //(XML->sys.target_core_clockrate*1e6);//Syed
 
 	//RF crossbar power (Syed)
 	xbar_shared->compute_power();
@@ -4351,7 +4351,7 @@ void RegFU::computeEnergy(bool is_tdp)
  */
 	if (!exist) return;
 
-  executionTime=XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);//Syed
+  executionTime=XML->sys.total_cycles/(XML->sys.core[0].clock_rate*1e6); //(XML->sys.target_core_clockrate*1e6);//Syed
  //RF crossbar power (Syed Gilani)
  xbar_rfu->compute_power();
 
@@ -4579,7 +4579,7 @@ void EXECU::computeEnergy(bool is_tdp)
 	//Syed
 	double pppm_t[4]    = {1,1,1,1};
 	double pppm_freqScaling[4]    = {rf_fu_clockRate/clockRate,1,1,1};
-  executionTime=XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);//Syed
+  executionTime=XML->sys.total_cycles/(XML->sys.core[0].clock_rate*1e6); //(XML->sys.target_core_clockrate*1e6);//Syed
 
 
 //	rfu->power.reset();

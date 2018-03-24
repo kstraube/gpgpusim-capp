@@ -322,7 +322,7 @@ void NoC::set_noc_param()
 	nocdynp.type            = XML->sys.NoC[ithNoC].type;
 	nocdynp.clockRate       =XML->sys.NoC[ithNoC].clockrate;
 	nocdynp.clockRate       *= 1e6;
-	nocdynp.executionTime   = XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);
+	nocdynp.executionTime   = XML->sys.total_cycles/(XML->sys.core[0].clock_rate*1e6); //(XML->sys.target_core_clockrate*1e6);
 
 	nocdynp.flit_size     = XML->sys.NoC[ithNoC].flit_bits;
 	if (nocdynp.type)

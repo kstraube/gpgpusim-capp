@@ -487,7 +487,7 @@ void DRAM::computeEnergy(bool is_tdp)
 		return; /// not supporting TDP calculation for DRAM
 	}
 	rt_power.reset();
-	dramp.executionTime   = XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);
+	dramp.executionTime   = XML->sys.total_cycles/(XML->sys.core[0].clock_rate*1e6); //(XML->sys.target_core_clockrate*1e6);
 
 	power_t.reset();
 	power_t.readOp.dynamic+=XML->sys.mc.memory_reads*dramp.rd_coeff;
@@ -803,9 +803,9 @@ void MemoryController::computeEnergy(bool is_tdp)
   frontend->rt_power.reset();
   transecEngine->rt_power.reset();
   dram->rt_power.reset();
-  mcp.executionTime   = XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6); //Jingwen
-  frontend->mcp.executionTime   = XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6); //Jingwen
-  transecEngine->mcp.executionTime  = XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6); //Jingwen
+  mcp.executionTime   = XML->sys.total_cycles/(XML->sys.core[0].clock_rate*1e6);//(XML->sys.target_core_clockrate*1e6); //Jingwen
+  frontend->mcp.executionTime   = XML->sys.total_cycles/(XML->sys.core[0].clock_rate*1e6);//(XML->sys.target_core_clockrate*1e6); //Jingwen
+  transecEngine->mcp.executionTime  = XML->sys.total_cycles/(XML->sys.core[0].clock_rate*1e6);//(XML->sys.target_core_clockrate*1e6); //Jingwen
   
   /*Jingwen: give stats for backend and phy */
   transecEngine->mcp.reads =XML->sys.mc.memory_reads;
@@ -822,7 +822,7 @@ void MemoryController::computeEnergy(bool is_tdp)
       PHY->rt_power.reset();//Jingwen
     PHY->mcp.reads =XML->sys.mc.memory_reads;
     PHY->mcp.writes =XML->sys.mc.memory_writes;
-    PHY->mcp.executionTime   = XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6); //Jingwen
+    PHY->mcp.executionTime   = XML->sys.total_cycles/(XML->sys.core[0].clock_rate*1e6); //(XML->sys.target_core_clockrate*1e6); //Jingwen
 		PHY->computeEnergy(is_tdp);
 	}
 	if (is_tdp)
@@ -923,7 +923,7 @@ void MemoryController::set_mc_param()
 	{
 	  mcp.clockRate       =XML->sys.mc.mc_clock*2;//DDR double pumped
 	  mcp.clockRate       *= 1e6;
-	  mcp.executionTime   = XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);
+	  mcp.executionTime   = XML->sys.total_cycles/(XML->sys.core[0].clock_rate*1e6);//(XML->sys.target_core_clockrate*1e6);
 
 	  mcp.llcBlockSize    =int(ceil(XML->sys.mc.llc_line_length/8.0))+XML->sys.mc.llc_line_length;//ecc overhead
 	  mcp.dataBusWidth    =int(ceil(XML->sys.mc.databus_width/8.0)) + XML->sys.mc.databus_width;
