@@ -1077,7 +1077,7 @@ void SharedCache::set_cache_param()
 	 cachep.name = "L2";
 	 cachep.clockRate       = XML->sys.L2[ithCache].clockrate;
 	 cachep.clockRate       *= 1e6;
-	 cachep.executionTime = XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);
+	 cachep.executionTime = XML->sys.total_cycles/(XML->sys.core[0].clock_rate*1e6); //(XML->sys.target_core_clockrate*1e6);
 	 interface_ip.data_arr_ram_cell_tech_type    = XML->sys.L2[ithCache].device_type;//long channel device LSTP
 	 interface_ip.data_arr_peri_global_tech_type = XML->sys.L2[ithCache].device_type;
 	 interface_ip.tag_arr_ram_cell_tech_type     = XML->sys.L2[ithCache].device_type;
@@ -1108,7 +1108,7 @@ void SharedCache::set_cache_param()
 	 cachep.name = "L3";
 	 cachep.clockRate       = XML->sys.L3[ithCache].clockrate;
 	 cachep.clockRate       *= 1e6;
-	 cachep.executionTime   = XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);
+	 cachep.executionTime   = XML->sys.total_cycles/(XML->sys.core[0].clock_rate*1e6); //(XML->sys.target_core_clockrate*1e6);
 	 interface_ip.data_arr_ram_cell_tech_type    = XML->sys.L3[ithCache].device_type;//long channel device LSTP
 	 interface_ip.data_arr_peri_global_tech_type = XML->sys.L3[ithCache].device_type;
 	 interface_ip.tag_arr_ram_cell_tech_type     = XML->sys.L3[ithCache].device_type;
@@ -1140,7 +1140,7 @@ void SharedCache::set_cache_param()
 	 cachep.dir_ty = (enum Dir_type) XML->sys.L1Directory[ithCache].Directory_type;
 	 cachep.clockRate       = XML->sys.L1Directory[ithCache].clockrate;
 	 cachep.clockRate       *= 1e6;
-	 cachep.executionTime   = XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);
+	 cachep.executionTime   = XML->sys.total_cycles/(XML->sys.core[0].clock_rate*1e6); //(XML->sys.target_core_clockrate*1e6);
 	 interface_ip.data_arr_ram_cell_tech_type    = XML->sys.L1Directory[ithCache].device_type;//long channel device LSTP
 	 interface_ip.data_arr_peri_global_tech_type = XML->sys.L1Directory[ithCache].device_type;
 	 interface_ip.tag_arr_ram_cell_tech_type     = XML->sys.L1Directory[ithCache].device_type;
@@ -1163,7 +1163,7 @@ void SharedCache::set_cache_param()
 	 cachep.dir_ty = (enum Dir_type) XML->sys.L2Directory[ithCache].Directory_type;
 	 cachep.clockRate       = XML->sys.L2Directory[ithCache].clockrate;
 	 cachep.clockRate       *= 1e6;
-	 cachep.executionTime   = XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);
+	 cachep.executionTime   = XML->sys.total_cycles/(XML->sys.core[0].clock_rate*1e6); //(XML->sys.target_core_clockrate*1e6);
 	 interface_ip.data_arr_ram_cell_tech_type    = XML->sys.L2Directory[ithCache].device_type;//long channel device LSTP
 	 interface_ip.data_arr_peri_global_tech_type = XML->sys.L2Directory[ithCache].device_type;
 	 interface_ip.tag_arr_ram_cell_tech_type     = XML->sys.L2Directory[ithCache].device_type;
