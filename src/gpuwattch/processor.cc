@@ -467,7 +467,7 @@ void Processor::compute ()
 			  rt_power = rt_power  + cores[i]->rt_power*pppm_t;
 		  }
   }
-  cout << "RT core pow: " << rt_power.readOp.dynamic << endl;
+  //cout << "RT core pow: " << rt_power.readOp.dynamic << endl;
 
   if (!XML->sys.Private_L2)
   {
@@ -491,7 +491,7 @@ void Processor::compute ()
 	  }
   }
   
-  cout << "l2 pow (with core)" << rt_power.readOp.dynamic << endl;
+  //cout << "l2 pow (with core)" << rt_power.readOp.dynamic << endl;
 
   l3.rt_power.reset();
   if (numL3 >0)
@@ -552,7 +552,7 @@ void Processor::compute ()
 		  }
 	  }
      
-   cout << "caches pow (with l2,core)" << rt_power.readOp.dynamic << endl;
+   //cout << "caches pow (with l2,core)" << rt_power.readOp.dynamic << endl;
 
 
   mcs.rt_power.reset();
@@ -565,9 +565,9 @@ void Processor::compute ()
 	  set_pppm(pppm_t,1/mc->mcp.executionTime, XML->sys.mc.number_mcs,XML->sys.mc.number_mcs,XML->sys.mc.number_mcs);
 	  mcs.rt_power = mc->rt_power*pppm_t;
 	  rt_power = rt_power  + mcs.rt_power;
-     cout << "mc exec time: " << mc->mcp.executionTime << endl;
-     cout << "mc power_simple: " << mc->rt_power.readOp.dynamic/mc->mcp.executionTime << endl;
-     cout << "mc power: " << mcs.rt_power.readOp.dynamic << endl;
+     //cout << "mc exec time: " << mc->mcp.executionTime << endl;
+     //cout << "mc power_simple: " << mc->rt_power.readOp.dynamic/mc->mcp.executionTime << endl;
+     //cout << "mc power: " << mcs.rt_power.readOp.dynamic << endl;
 
   }
   

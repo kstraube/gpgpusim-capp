@@ -249,6 +249,8 @@ void gpgpu_sim_wrapper::set_inst_power(bool clk_gated_lanes, double tot_cycles, 
 	p->sys.core[0].committed_instructions = committed_inst;
 	sample_perf_counters[FP_INT]=int_inst+fp_inst;
 	sample_perf_counters[TOT_INST]=tot_inst;
+   //cout << "sample tot inst: " << tot_inst << endl;
+   //cout << "sample fp inst: " << sample_perf_counters[FP_INT] << endl;
 }
 
 void gpgpu_sim_wrapper::set_regfile_power(double reads, double writes,double ops)
@@ -538,7 +540,7 @@ void gpgpu_sim_wrapper::update_coefficients()
 	}
 }
 
-void gpgpu_sim_wrapper::update_components_power()
+double gpgpu_sim_wrapper::update_components_power()
 {
 
 	update_coefficients();
@@ -552,7 +554,7 @@ void gpgpu_sim_wrapper::update_components_power()
 			    +proc->cores[0]->ifu->ID_inst->rt_power.readOp.dynamic)/(proc->cores[0]->executionTime);
 
 	sample_cmp_pwr[ICP]=proc->cores[0]->ifu->icache.rt_power.readOp.dynamic/(proc->cores[0]->executionTime);
-   cout <<"Exec Time: " << (proc->cores[0]->executionTime) << endl;
+   //cout <<"Exec Time: " << (proc->cores[0]->executionTime) << endl;
 
 	sample_cmp_pwr[DCP]=proc->cores[0]->lsu->dcache.rt_power.readOp.dynamic/(proc->cores[0]->executionTime);
 
@@ -563,23 +565,25 @@ void gpgpu_sim_wrapper::update_components_power()
 	sample_cmp_pwr[SHRDP]=proc->cores[0]->lsu->sharedmemory.rt_power.readOp.dynamic/(proc->cores[0]->executionTime);
 
 	sample_cmp_pwr[RFP]=(proc->cores[0]->exu->rfu->rt_power.readOp.dynamic/(proc->cores[0]->executionTime))
-			   *(proc->cores[0]->exu->rf_fu_clockRate/proc->cores[0]->exu->clockRate);
+			   *(proc->cores[0]->exu->rf_fu_clockRate/(proc->XML->sys.target_core_clockrate*1e6));  //proc->cores[0]->exu->clockRate);
 
 	sample_cmp_pwr[SPP]=(proc->cores[0]->exu->exeu->rt_power.readOp.dynamic/(proc->cores[0]->executionTime))
-			   *(proc->cores[0]->exu->rf_fu_clockRate/proc->cores[0]->exu->clockRate);
+			   *(proc->cores[0]->exu->rf_fu_clockRate/(proc->XML->sys.target_core_clockrate*1e6));//proc->cores[0]->exu->clockRate);
 
 	sample_cmp_pwr[SFUP]=(proc->cores[0]->exu->mul->rt_power.readOp.dynamic/(proc->cores[0]->executionTime));
 
 	sample_cmp_pwr[FPUP]=(proc->cores[0]->exu->fp_u->rt_power.readOp.dynamic/(proc->cores[0]->executionTime));
+   //cout << "FPUP STAT PWR: " << proc->cores[0]->exu->fp_u->rt_power.readOp.dynamic/(proc->cores[0]->executionTime) << endl;
+   //cout << "MCP DRAM STAT PWR: " << proc->cores[0]->executionTime << endl;
 
 	sample_cmp_pwr[SCHEDP]=proc->cores[0]->exu->scheu->rt_power.readOp.dynamic/(proc->cores[0]->executionTime);
 
 	sample_cmp_pwr[L2CP]=(proc->XML->sys.number_of_L2s>0)? proc->l2array[0]->rt_power.readOp.dynamic/(proc->cores[0]->executionTime):0;
 
 	sample_cmp_pwr[MCP]=(proc->mc->rt_power.readOp.dynamic-proc->mc->dram->rt_power.readOp.dynamic)/(proc->cores[0]->executionTime);
-   cout << "MCP SIMPLE STAT PWR: " << proc->mc->rt_power.readOp.dynamic/(proc->cores[0]->executionTime) << endl;
-   cout << "MCP STAT PWR: " << sample_cmp_pwr[MCP] << endl;
-   cout << "MCP DRAM STAT PWR: " << proc->mc->dram->rt_power.readOp.dynamic/(proc->cores[0]->executionTime) << endl;
+   //cout << "MCP SIMPLE STAT PWR: " << proc->mc->rt_power.readOp.dynamic/(proc->cores[0]->executionTime) << endl;
+   //cout << "MCP STAT PWR: " << sample_cmp_pwr[MCP] << endl;
+   //cout << "MCP DRAM STAT PWR: " << proc->mc->dram->rt_power.readOp.dynamic/(proc->cores[0]->executionTime) << endl;
 
 	sample_cmp_pwr[NOCP]=proc->nocs[0]->rt_power.readOp.dynamic/(proc->cores[0]->executionTime);
 
@@ -605,18 +609,18 @@ void gpgpu_sim_wrapper::update_components_power()
 		sum_pwr_cmp+=sample_cmp_pwr[i];
 	}
 	bool check=false;
-   cout << "sum power: " << sum_pwr_cmp << endl;
-   cout << "proc power: " << proc_power << endl;
+   //cout << "sum power: " << sum_pwr_cmp << endl;
+   //cout << "proc power: " << proc_power << endl;
 	check=sanity_check(sum_pwr_cmp,proc_power);
 	assert("Total Power does not equal the sum of the components\n" && (check));
-
+   return (proc_power - sample_cmp_pwr[DRAMP] - sample_cmp_pwr[NOCP] - sample_cmp_pwr[L2CP]);
 }
 
 void gpgpu_sim_wrapper::compute()
 {
 	proc->compute();
-   cout << "MCP SIMPLE Compute STAT PWR: " << proc->mc->rt_power.readOp.dynamic/(proc->cores[0]->executionTime) << endl;
-   cout << "MCP SIMPLE_mc Compute STAT PWR: " << proc->mc->rt_power.readOp.dynamic/proc->mc->mcp.executionTime <<endl;
+   //cout << "MCP SIMPLE Compute STAT PWR: " << proc->mc->rt_power.readOp.dynamic/(proc->cores[0]->executionTime) << endl;
+   //cout << "MCP SIMPLE_mc Compute STAT PWR: " << proc->mc->rt_power.readOp.dynamic/proc->mc->mcp.executionTime <<endl;
 }
 void gpgpu_sim_wrapper::print_power_kernel_stats(double gpu_sim_cycle, double gpu_tot_sim_cycle, double init_value, const std::string & kernel_info_string, bool print_trace)
 {

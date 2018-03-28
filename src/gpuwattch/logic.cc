@@ -610,7 +610,8 @@ FunctionalUnit::FunctionalUnit(ParseXML *XML_interface, int ithCore_, InputParam
 void FunctionalUnit::computeEnergy(bool is_tdp)
 {
  
-  executionTime=XML->sys.total_cycles/(XML->sys.target_core_clockrate*1e6);//Syed
+  executionTime=XML->sys.total_cycles/(XML->sys.core[0].clock_rate*1e6); //(XML->sys.target_core_clockrate*1e6);//Syed
+  //cout <<"logic exec time: "<< executionTime <<endl;
 	double pppm_t[4]    = {1,1,1,1};
 	double FU_duty_cycle;
 	if (is_tdp)
@@ -683,9 +684,11 @@ void FunctionalUnit::computeEnergy(bool is_tdp)
 		}
 		else{
 		  rt_power.readOp.dynamic = per_access_energy*stats_t.readAc.access;
+        //cout<<"FPU per access energy: " << per_access_energy << endl;
 		}
 
 		double sckRation = g_tp.sckt_co_eff;
+      //cout << "sckRation: " << sckRation << endl;
 		rt_power.readOp.dynamic *= sckRation;
 		rt_power.writeOp.dynamic *= sckRation;
 		rt_power.searchOp.dynamic *= sckRation;

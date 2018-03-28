@@ -750,6 +750,9 @@ void gpgpu_sim::init()
     gpu_sim_insn = 0;
     last_gpu_sim_insn = 0;
     m_total_cta_launched=0;
+    
+    first_outputJason = true;
+    first_outputKS = true;
 
     reinit_clock_domains();
     set_param_gpgpu_num_shaders(m_config.num_shader());
@@ -781,7 +784,7 @@ void gpgpu_sim::init()
 #endif
 
 	for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
-		m_cluster[i]->set_clock_period(1e-6/700);//m_config.core_period);
+		m_cluster[i]->set_clock_period(1e-6/300);//m_config.core_period);
 	}
 }
 
@@ -1380,7 +1383,7 @@ unsigned long long g_single_step=0; // set this in gdb to single step the pipeli
 void gpgpu_sim::cycle()
 {
    int clock_mask = next_clock_domain();
-
+   double power = -1;
    if (clock_mask & CORE ) {
        // shader core loading (pop from ICNT into core) follows CORE clock
       for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
@@ -1443,6 +1446,7 @@ void gpgpu_sim::cycle()
    if (clock_mask & CORE) {
            m_power_stats->pwr_mem_stat->core_cache_stats[CURRENT_STAT_IDX].clear();
 	   for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
+       //cout << "cluster status: " << m_cluster[i]->is_ticking() << " " << m_cluster[i]->get_not_completed() << " " << get_more_cta_left() << endl;
  		 if (m_cluster[i]->is_ticking()) {
  	         if (m_cluster[i]->get_not_completed() || get_more_cta_left() ) {
  	               m_cluster[i]->core_cycle();
@@ -1457,7 +1461,7 @@ void gpgpu_sim::cycle()
            m_cluster[i]->get_icnt_stats(m_power_stats->pwr_mem_stat->n_simt_to_mem[CURRENT_STAT_IDX][i], m_power_stats->pwr_mem_stat->n_mem_to_simt[CURRENT_STAT_IDX][i]);
 		  m_cluster[i]->get_cache_stats(m_power_stats->pwr_mem_stat->core_cache_stats[CURRENT_STAT_IDX]);
            }
-           cout << "Active sms" << *active_sms << endl;
+           //cout << "Active sms" << *active_sms << endl;
            float temp=0;
            for (unsigned i=0;i<m_shader_config->num_shader();i++){
                  temp+=m_shader_stats->m_pipeline_duty_cycle[i];
@@ -1495,11 +1499,34 @@ void gpgpu_sim::cycle()
       gpu_sim_cycle++;
       if( g_interactive_debugger_enabled )
          gpgpu_debug();
+         
+       //cout << "tot inst each cycle: " << m_power_stats->get_total_inst() << endl;
 
       // McPAT main cycle (interface with McPAT)
 #ifdef GPGPUSIM_POWER_MODEL
       if(m_config.g_power_simulation_enabled){
-          mcpat_cycle(m_config, getShaderCoreConfig(), m_gpgpusim_wrapper, m_power_stats, m_config.gpu_stat_sample_freq, gpu_tot_sim_cycle, gpu_sim_cycle, gpu_tot_sim_insn, gpu_sim_insn);
+          power = mcpat_cycle(m_config, getShaderCoreConfig(), m_gpgpusim_wrapper, m_power_stats, m_config.gpu_stat_sample_freq, gpu_tot_sim_cycle, gpu_sim_cycle, gpu_tot_sim_insn, gpu_sim_insn);
+          if (power > -1) {
+            if (!outputKS.is_open()) {
+               if (first_outputKS) {
+                  outputKS.open("ks_stats.bin", ios::out | ios::binary | ios::trunc);
+                  first_outputKS = false;
+               }
+               else {
+                  outputKS.open("ks_stats.bin", ios::out | ios::binary | ios::app);
+               }
+            }
+            
+            outputKS.write(reinterpret_cast<char*>(&power), sizeof(power));
+            
+          for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
+            double clk_period = m_cluster[i]->get_clock_period();
+            outputKS.write(reinterpret_cast<char*>(&clk_period), sizeof(clk_period));
+            double temp_voltage = 1.0;
+            outputKS.write(reinterpret_cast<char*>(&temp_voltage), sizeof(temp_voltage));
+          }
+          outputKS.close();
+         }
       }
 #endif
 
@@ -1541,12 +1568,20 @@ void gpgpu_sim::cycle()
 
       if (!(gpu_sim_cycle % 100)) {
          // Do my stats.
+            
          if (!myoutput.is_open()) {
-            myoutput.open("core_stats.bin", ios::out | ios::binary | ios::trunc);
-			myoutput << "Jason's weird file....." << get_config().num_shader();
+            if (first_outputJason) {
+               myoutput.open("core_stats.bin", ios::out | ios::binary | ios::trunc);
+               myoutput << "Jason's weird file....."<< get_config().num_shader();
+               first_outputJason = false;
+            }
+            else {
+               myoutput.open("core_stats.bin", ios::out | ios::binary | ios::app);
+            }
          }
 
          for (int i=0; i<get_config().num_shader(); i++) {
+         
 			int d = m_shader_stats->m_num_sim_insn[i] - m_shader_stats->m_num_sim_insn_last[i];
 			m_shader_stats->m_num_sim_insn_last[i] = m_shader_stats->m_num_sim_insn[i];
 			assert(d >= 0);
@@ -1556,6 +1591,7 @@ void gpgpu_sim::cycle()
 		 for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
 			m_cluster[i]->printReadyWarps(myoutput);
 		 }
+       myoutput.close();
       }
 
       if (!(gpu_sim_cycle % m_config.gpu_stat_sample_freq)) {

@@ -530,6 +530,9 @@ public:
    }
 
    std::fstream myoutput;
+   std::fstream outputKS;
+   bool first_outputKS;
+   bool first_outputJason;
 };
 
 #endif

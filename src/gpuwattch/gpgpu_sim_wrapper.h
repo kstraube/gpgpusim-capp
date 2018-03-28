@@ -65,7 +65,7 @@ public:
 	void compute();
 	void dump();
 	void print_trace_files();
-	void update_components_power();
+	double update_components_power();
 	void update_coefficients();
 	void reset_counters();
 	void print_power_kernel_stats(double gpu_sim_cycle, double gpu_tot_sim_cycle, double init_value, const std::string & kernel_info_string, bool print_trace);

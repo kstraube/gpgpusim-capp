@@ -38,13 +38,14 @@ void init_mcpat(const gpgpu_sim_config &config, class gpgpu_sim_wrapper *wrapper
 
 }
 
-void mcpat_cycle(const gpgpu_sim_config &config, const struct shader_core_config *shdr_config, class gpgpu_sim_wrapper *wrapper, class power_stat_t *power_stats, unsigned stat_sample_freq, unsigned tot_cycle, unsigned cycle, unsigned tot_inst, unsigned inst){
+double mcpat_cycle(const gpgpu_sim_config &config, const struct shader_core_config *shdr_config, class gpgpu_sim_wrapper *wrapper, class power_stat_t *power_stats, unsigned stat_sample_freq, unsigned tot_cycle, unsigned cycle, unsigned tot_inst, unsigned inst){
 
 	static bool mcpat_init=true;
+   double res = -1;
 
 	if(mcpat_init){ // If first cycle, don't have any power numbers yet
 		mcpat_init=false;
-		return;
+		return -1;
 	}
 
 	if ((tot_cycle+cycle) % stat_sample_freq == 0) {
@@ -107,7 +108,7 @@ void mcpat_cycle(const gpgpu_sim_config &config, const struct shader_core_config
 		wrapper->compute();
 
 
-		wrapper->update_components_power();
+		res = wrapper->update_components_power();
 		wrapper->print_trace_files();
 		power_stats->save_stats();
 
@@ -117,8 +118,10 @@ void mcpat_cycle(const gpgpu_sim_config &config, const struct shader_core_config
 
 
 		wrapper->dump();
+      
 	}
 	//wrapper->close_files();
+   return res;
 }
 
 void mcpat_reset_perf_count(class gpgpu_sim_wrapper *wrapper){

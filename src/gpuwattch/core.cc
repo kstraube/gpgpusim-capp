@@ -1681,7 +1681,7 @@ EXECU::EXECU(ParseXML* XML_interface, int ithCore_, InputParameter* interface_ip
 	  if (!exist) return;
 	  double fu_height = 0.0;
       clockRate = coredynp.clockRate;
-		//cout <<"EXECU exClockRate: "<<exClockRate<<endl;
+		cout <<"EXECU exClockRate: "<<exClockRate<<endl;
       executionTime = coredynp.executionTime;
 	  rfu   = new RegFU(XML, ithCore, &interface_ip,coredynp,exClockRate);
 	  scheu = new SchedulerU(XML, ithCore, &interface_ip,coredynp);
@@ -2351,7 +2351,7 @@ Core::Core(ParseXML* XML_interface, int ithCore_, InputParameter* interface_ip_)
 //  interface_ip.wt               =Global_30;
   set_core_param();
   clockRate = coredynp.clockRate;
-  exClockRate = clockRate*XML->sys.core[ithCore].core_clock_ratio;
+  exClockRate = XML->sys.target_core_clockrate*1e6*XML->sys.core[ithCore].core_clock_ratio;//clockRate*XML->sys.core[ithCore].core_clock_ratio;
 
   executionTime = coredynp.executionTime;
   ifu          = new InstFetchU(XML, ithCore, &interface_ip,coredynp);
@@ -4578,7 +4578,7 @@ void EXECU::computeEnergy(bool is_tdp)
 	if (!exist) return;
 	//Syed
 	double pppm_t[4]    = {1,1,1,1};
-	double pppm_freqScaling[4]    = {rf_fu_clockRate/clockRate,1,1,1};
+	double pppm_freqScaling[4]    = {rf_fu_clockRate/(XML->sys.target_core_clockrate*1e6),1,1,1};//clockRate
   executionTime=XML->sys.total_cycles/(XML->sys.core[0].clock_rate*1e6); //(XML->sys.target_core_clockrate*1e6);//Syed
 
 
