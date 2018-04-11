@@ -621,6 +621,9 @@ gpgpu_sim::gpgpu_sim( const gpgpu_sim_config &config )
     gpu_tot_issued_cta = 0;
     m_total_cta_launched = 0;
     gpu_deadlock = false;
+    
+    first_outputJason = true;
+    first_outputKS = true;
 
 
     m_cluster = new simt_core_cluster*[m_shader_config->n_simt_clusters];
@@ -750,9 +753,6 @@ void gpgpu_sim::init()
     gpu_sim_insn = 0;
     last_gpu_sim_insn = 0;
     m_total_cta_launched=0;
-    
-    first_outputJason = true;
-    first_outputKS = true;
 
     reinit_clock_domains();
     set_param_gpgpu_num_shaders(m_config.num_shader());
@@ -784,7 +784,7 @@ void gpgpu_sim::init()
 #endif
 
 	for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
-		m_cluster[i]->set_clock_period(1e-6/300);//m_config.core_period);
+		m_cluster[i]->set_clock_period(1e-6/700);//m_config.core_period);
 	}
 }
 
