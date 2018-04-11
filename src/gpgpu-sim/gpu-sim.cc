@@ -621,6 +621,9 @@ gpgpu_sim::gpgpu_sim( const gpgpu_sim_config &config )
     gpu_tot_issued_cta = 0;
     m_total_cta_launched = 0;
     gpu_deadlock = false;
+    
+    first_outputJason = true;
+    first_outputKS = true;
 
 
     m_cluster = new simt_core_cluster*[m_shader_config->n_simt_clusters];
@@ -746,13 +749,13 @@ bool gpgpu_sim::active()
 void gpgpu_sim::init()
 {
     // run a CUDA grid on the GPU microarchitecture simulator
+    myVoltage = 1.05;
     gpu_sim_cycle = 0;
     gpu_sim_insn = 0;
     last_gpu_sim_insn = 0;
     m_total_cta_launched=0;
     
-    first_outputJason = true;
-    first_outputKS = true;
+    
 
     reinit_clock_domains();
     set_param_gpgpu_num_shaders(m_config.num_shader());
@@ -784,7 +787,7 @@ void gpgpu_sim::init()
 #endif
 
 	for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
-		m_cluster[i]->set_clock_period(1e-6/300);//m_config.core_period);
+		m_cluster[i]->set_clock_period(1e-6/700);//m_config.core_period);
 	}
 }
 
@@ -1382,6 +1385,11 @@ unsigned long long g_single_step=0; // set this in gdb to single step the pipeli
 
 void gpgpu_sim::cycle()
 {
+
+   double minPeriod = 1e-6/700; //700 MHz
+   double maxPeriod = 1e-8; //100 MHz
+   std::vector<int> allFreqs = {700,600,500,400,300,200,100};
+   std::vector<double> allVoltages = {1.05,0.975,0.9,0.825,0.75,0.675,0.6};
    int clock_mask = next_clock_domain();
    double power = -1;
    if (clock_mask & CORE ) {
@@ -1507,6 +1515,22 @@ void gpgpu_sim::cycle()
       if(m_config.g_power_simulation_enabled){
           power = mcpat_cycle(m_config, getShaderCoreConfig(), m_gpgpusim_wrapper, m_power_stats, m_config.gpu_stat_sample_freq, gpu_tot_sim_cycle, gpu_sim_cycle, gpu_tot_sim_insn, gpu_sim_insn);
           if (power > -1) {
+            myVoltage = calcNewVoltage(power, myVoltage); //- need to convert new voltage to freq and assign and to keep track of current global voltage KSTODO
+            
+
+             for (int i=0; i<get_config().num_shader(); i++) {
+                 //double currRatio = ratioCtrl(myRatios[i], insts[i]);
+                 double currRatio = 1.0;
+                  double myVoltagePerSM = currRatio * myVoltage;
+                  // cout << i << "_" << myRatios.size() << endl;
+                  //myRatios[i] = currRatio;
+                 int myFreq = findFreqFromVoltage(myVoltagePerSM, allFreqs,allVoltages);
+                 if (i==0){ cout << "period = " << max(min(1e-6/myFreq, maxPeriod),minPeriod) << endl;
+                 }
+              m_cluster[i]->set_clock_period(max(min(1e-6/myFreq, maxPeriod),minPeriod));//set new frequency value based on new freq
+              //m_cluster[i]->set_clock_period(1e-6/700);
+             }
+                   
             if (!outputKS.is_open()) {
                if (first_outputKS) {
                   outputKS.open("ks_stats.bin", ios::out | ios::binary | ios::trunc);
@@ -1647,6 +1671,44 @@ void gpgpu_sim::cycle()
       launch_one_device_kernel();
 #endif
    }
+}
+
+double gpgpu_sim::calcNewVoltage(double total_power, double currV){
+	 double newV = 0;
+	 double Kp = 0.4;
+	 double Ki = 0;
+	 double Kd = 0;
+
+	 double PIDerror = min((TDP_SPEC-total_power) / total_power * currV,MAX_PID_ERROR);
+	 //cout << "PID error:"<<PIDerror<<endl;
+
+	 newV = currV + Kp*PIDerror;
+
+	 return min(newV,MAX_PID_VOLTAGE);
+
+}
+
+double gpgpu_sim::ratioCtrl(double myRatio, int currInst){
+	 //eval current cluster IPC and increase or decrease ratio accordingly, multiply ratio * myVoltage to get new voltage
+	 if (currInst > IPC_UP_THRESHOLD_CAPP){
+		 myRatio = min(myRatio + CAPP_RATIO_UP_STEP,CAPP_MAX_RATIO);
+	 }
+	 else if (currInst < IPC_DOWN_THRESHOLD_CAPP){
+		 myRatio = max(myRatio-CAPP_RATIO_DOWN_STEP,CAPP_MIN_RATIO);
+	 }
+	 return myRatio;
+}
+
+int gpgpu_sim::findFreqFromVoltage(double myVoltage, std::vector<int> allFreqs, std::vector<double> allVoltages){
+	 int newFreq = 0;
+	 for (int i = 0; i < allFreqs.size(); i++){
+		 //cout << "voltage compare: " << allVoltages[i] << "==?" << myVoltage << endl;
+		  if (allVoltages[i] < myVoltage) {
+				 newFreq = allFreqs[i];
+				 return newFreq;
+			}
+	 }
+	 return allFreqs.back();
 }
 
 

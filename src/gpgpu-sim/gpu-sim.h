@@ -63,6 +63,17 @@
 #define SAMPLELOG 222
 #define DUMPLOG 333
 
+#define TDP_SPEC 45.0 //W
+#define IPC_UP_THRESHOLD_CAPP 50
+#define IPC_DOWN_THRESHOLD_CAPP 30
+#define CAPP_RATIO_UP_STEP 0.05
+#define CAPP_RATIO_DOWN_STEP 0.05
+#define CAPP_MAX_RATIO 1.0
+#define CAPP_MIN_RATIO 0.7
+#define MAX_PID_ERROR 100.0
+#define MAX_PID_VOLTAGE 2.5
+#define PID_TEST 0
+
 
 
 
@@ -379,7 +390,10 @@ public:
 
    void init();
    void cycle();
-   bool active();
+   bool active();   
+   double calcNewVoltage(double total_power, double currV);
+   int findFreqFromVoltage(double myVoltage, std::vector<int> allFreqs, std::vector<double> allVoltages);
+   double ratioCtrl(double myRatio,int currInst);
    bool cycle_insn_cta_max_hit() {
        return (m_config.gpu_max_cycle_opt && (gpu_tot_sim_cycle + gpu_sim_cycle) >= m_config.gpu_max_cycle_opt) ||
            (m_config.gpu_max_insn_opt && (gpu_tot_sim_insn + gpu_sim_insn) >= m_config.gpu_max_insn_opt) ||
@@ -469,6 +483,9 @@ private:
    double dram_time;
    double l2_time;
    double gpu_time;
+   
+   double myVoltage;
+   std::vector<double> myRatios;
 
    // debug
    bool gpu_deadlock;

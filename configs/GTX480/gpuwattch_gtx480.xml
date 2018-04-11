@@ -69,7 +69,7 @@
 		<!-- *********************** cores ******************* -->
 		<component id="system.core0" name="core0">
 			<!-- Core property -->
-			<param name="clock_rate" value="500"/>
+			<param name="clock_rate" value="700"/>
 			<param name="instruction_length" value="32"/>
 			<param name="opcode_width" value="9"/>
 			<!-- address width determins the tag_width in Cache, LSQ and buffers in cache controller 
