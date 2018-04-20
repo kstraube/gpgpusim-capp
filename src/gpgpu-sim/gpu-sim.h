@@ -486,6 +486,7 @@ private:
    
    double myVoltage;
    std::vector<double> myRatios;
+   std::vector<unsigned> prevInsts;
 
    // debug
    bool gpu_deadlock;

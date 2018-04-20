@@ -624,11 +624,16 @@ gpgpu_sim::gpgpu_sim( const gpgpu_sim_config &config )
     
     first_outputJason = true;
     first_outputKS = true;
-
+    
 
     m_cluster = new simt_core_cluster*[m_shader_config->n_simt_clusters];
-    for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++)
+    for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
         m_cluster[i] = new simt_core_cluster(this,i,m_shader_config,m_memory_config,m_shader_stats,m_memory_stats);
+        cout << "init ratios" << i << endl;
+        myRatios.push_back(1.0);
+        prevInsts.push_back(0);
+    }
+    cout << "_" << myRatios.size() << endl;
 
     m_memory_partition_unit = new memory_partition_unit*[m_memory_config->m_n_mem];
     m_memory_sub_partition = new memory_sub_partition*[m_memory_config->m_n_mem_sub_partition];
@@ -759,8 +764,10 @@ void gpgpu_sim::init()
 
     reinit_clock_domains();
     set_param_gpgpu_num_shaders(m_config.num_shader());
-    for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++)
+    for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
        m_cluster[i]->reinit();
+       //myRatios[i] = 1.0;
+    }
     m_shader_stats->new_grid();
     // initialize the control-flow, memory access, memory latency logger
     if (m_config.g_visualizer_enabled) {
@@ -1513,20 +1520,25 @@ void gpgpu_sim::cycle()
       // McPAT main cycle (interface with McPAT)
 #ifdef GPGPUSIM_POWER_MODEL
       if(m_config.g_power_simulation_enabled){
+          //cout << "kk" << myRatios.size() << endl;
           power = mcpat_cycle(m_config, getShaderCoreConfig(), m_gpgpusim_wrapper, m_power_stats, m_config.gpu_stat_sample_freq, gpu_tot_sim_cycle, gpu_sim_cycle, gpu_tot_sim_insn, gpu_sim_insn);
           if (power > -1) {
+            int instLocalCtrl = 0;
             myVoltage = calcNewVoltage(power, myVoltage); //- need to convert new voltage to freq and assign and to keep track of current global voltage KSTODO
             
 
              for (int i=0; i<get_config().num_shader(); i++) {
-                 //double currRatio = ratioCtrl(myRatios[i], insts[i]);
-                 double currRatio = 1.0;
+                 cout << i << endl;
+                 instLocalCtrl = m_shader_stats->m_num_sim_insn[i] - prevInsts[i];
+			        prevInsts[i] = m_shader_stats->m_num_sim_insn[i];
+                 double currRatio = ratioCtrl(myRatios[i], instLocalCtrl);
+                 //double currRatio = 1.0;
                   double myVoltagePerSM = currRatio * myVoltage;
                   // cout << i << "_" << myRatios.size() << endl;
-                  //myRatios[i] = currRatio;
+                  myRatios[i] = currRatio;
                  int myFreq = findFreqFromVoltage(myVoltagePerSM, allFreqs,allVoltages);
-                 if (i==0){ cout << "period = " << max(min(1e-6/myFreq, maxPeriod),minPeriod) << endl;
-                 }
+                 // if (i==0){ cout << "period = " << max(min(1e-6/myFreq, maxPeriod),minPeriod) << endl;
+                 // }
               m_cluster[i]->set_clock_period(max(min(1e-6/myFreq, maxPeriod),minPeriod));//set new frequency value based on new freq
               //m_cluster[i]->set_clock_period(1e-6/700);
              }
@@ -1546,8 +1558,10 @@ void gpgpu_sim::cycle()
           for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
             double clk_period = m_cluster[i]->get_clock_period();
             outputKS.write(reinterpret_cast<char*>(&clk_period), sizeof(clk_period));
-            double temp_voltage = 1.0;
+            double temp_voltage = myRatios[i]*2;//*myVoltage;
             outputKS.write(reinterpret_cast<char*>(&temp_voltage), sizeof(temp_voltage));
+            double temp_insts = m_shader_stats->m_num_sim_insn[i];
+            outputKS.write(reinterpret_cast<char*>(&temp_insts), sizeof(temp_insts));
           }
           outputKS.close();
          }
@@ -1690,6 +1704,7 @@ double gpgpu_sim::calcNewVoltage(double total_power, double currV){
 
 double gpgpu_sim::ratioCtrl(double myRatio, int currInst){
 	 //eval current cluster IPC and increase or decrease ratio accordingly, multiply ratio * myVoltage to get new voltage
+    cout << "IPC: " << currInst << endl;
 	 if (currInst > IPC_UP_THRESHOLD_CAPP){
 		 myRatio = min(myRatio + CAPP_RATIO_UP_STEP,CAPP_MAX_RATIO);
 	 }
